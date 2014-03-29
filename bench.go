@@ -15,12 +15,13 @@ func dialTimeout(network, addr string) (net.Conn, error) {
     return net.DialTimeout(network, addr, connectionTimeout);
 }
 
-func request(request Url, wait chan bool) {
+func request(inputUrl chan Url, wait chan bool) {
     var response *http.Response
     var req *http.Request
     var err error
 
     go func() {
+        request := <-inputUrl;
         tr := &http.Transport{
             ResponseHeaderTimeout: responseTimeout,
             Dial: dialTimeout,
@@ -117,6 +118,7 @@ func startBench() {
 
     var count int = 1;
     var wait = make(chan bool);
+    var urlInput = make(chan Url);
     responseStats = make(map[string]int);
     urlsResponseTimes = make(map[string]time.Duration);
 
@@ -133,7 +135,11 @@ func startBench() {
 
         for j := 0; j < max; j++ {
             count++;
-            request(urls[rand.Intn(len(urls))], wait);
+            request(urlInput, wait);
+        }
+
+        for j := 0; j < max; j++ {
+            urlInput <- urls[rand.Intn(len(urls))];
         }
 
     }
