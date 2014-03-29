@@ -142,6 +142,9 @@ func startBench() {
             urlInput <- urls[rand.Intn(len(urls))];
         }
 
+        if (delay > 0) {
+            time.Sleep(time.Duration(rand.Intn(delay)) * time.Second);
+        }
     }
 
     for i := 0; i < requests; i++ {

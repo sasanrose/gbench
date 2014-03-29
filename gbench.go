@@ -13,7 +13,7 @@ var (
     err error
     urlFile *os.File
     requests, concurrent int = 0, 1
-    totalTransactions, failedTransactions int
+    totalTransactions, failedTransactions, delay int
     cookies []string
     responseStats map[string]int
     urlsResponseTimes map[string]time.Duration

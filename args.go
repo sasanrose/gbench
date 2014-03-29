@@ -63,6 +63,9 @@ func parsArgs() {
                 addHeader(args[i+1]);
             case "--disable-keep-alive", "-d":
                 disableKeepAlive = true;
+            case "--delay", "-de":
+                checkArgs(args, i);
+                delay, _ = strconv.Atoi(args[i+1]);
             case "--":
                 break;
         }
