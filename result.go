@@ -25,4 +25,11 @@ func showResult() {
     for code, count := range responseStats {
         fmt.Printf("%v: %v\n", code, count);
     }
+
+    if (len(urlFailedStats) > 0) {
+        fmt.Println("\n\nFailed Url Stats:");
+        for url, count := range urlFailedStats {
+            fmt.Printf("%v: %v\n", url, count);
+        }
+    }
 }

@@ -91,6 +91,7 @@ func request(inputUrl chan Url, wait chan bool) {
 
             if (response.StatusCode != 200) {
                 failedTransactions++;
+                urlFailedStats[request.url]++;
             }
 
             responseStats[response.Status]++;
@@ -120,6 +121,7 @@ func startBench() {
     var wait = make(chan bool);
     var urlInput = make(chan Url);
     responseStats = make(map[string]int);
+    urlFailedStats = make(map[string]int);
     urlsResponseTimes = make(map[string]time.Duration);
 
     t1 := time.Now();

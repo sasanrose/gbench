@@ -15,7 +15,7 @@ var (
     requests, concurrent int = 0, 1
     totalTransactions, failedTransactions, delay int
     cookies []string
-    responseStats map[string]int
+    responseStats, urlFailedStats map[string]int
     urlsResponseTimes map[string]time.Duration
     totalResponseTime, shortestResponseTime, longestResponseTime, responseTimeout, connectionTimeout time.Duration
     averageResponseTime, transactionRate, transferredData float64
@@ -41,7 +41,7 @@ func main() {
     go func() {
         for sig := range interruptSignal {
             showResult();
-            fmt.Printf("Got Signal: %v", sig);
+            fmt.Printf("Got Signal: %v\n", sig);
             os.Exit(1);
         }
     }()
