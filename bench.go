@@ -28,8 +28,9 @@ func request(inputUrl chan Url, wait chan bool) {
             DisableKeepAlives: disableKeepAlive,
         };
 
-        if (proxyUrl != nil) {
-            tr.Proxy = http.ProxyURL(proxyUrl);
+        if (proxyUrl != "") {
+            p, _ := url.Parse(string(proxyUrl));
+            tr.Proxy = http.ProxyURL(p);
         }
 
         client := &http.Client{Transport: tr};

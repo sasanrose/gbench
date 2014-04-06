@@ -5,24 +5,23 @@ import (
     "time"
     "os/signal"
     "fmt"
-    "net/url"
 )
 
 var (
-    urls []Url
+    urls urlsList
     err error
     urlFile *os.File
-    requests, concurrent int = 0, 1
+    requests, concurrent int
     totalTransactions, failedTransactions, delay int
-    cookies []string
+    cookies cookiesList
     responseStats, urlFailedStats map[string]int
     urlsResponseTimes map[string]time.Duration
     totalResponseTime, shortestResponseTime, longestResponseTime, responseTimeout, connectionTimeout time.Duration
     averageResponseTime, transactionRate, transferredData float64
     basicAuthUsername, basicAuthPassword string
-    proxyUrl *url.URL
+    proxyUrl proxyURL
     totalLength int64
-    headers map[string]string
+    headers headersList
     verbose bool = false
     disableKeepAlive bool = false
 )
@@ -32,6 +31,11 @@ type Url struct {
     method string
     data map[string]string
 }
+
+type urlsList []Url;
+type cookiesList []string;
+type headersList map[string]string;
+type proxyURL string;
 
 // Main func
 func main() {
@@ -46,7 +50,7 @@ func main() {
         }
     }()
 
-    parsArgs();
+
     startBench();
     showResult();
 }
