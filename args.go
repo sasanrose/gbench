@@ -234,7 +234,7 @@ func flagDefaults () {
     fmt.Println("Sample URLs: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com");
     fmt.Println("\nExamples:");
     fmt.Println("gbench -file ~/benchmarkurl.txt -r 100 -c 10 -v");
-    fmt.Println("gbench -url www.google.com -url www.yahoo.com -r 100 -c 10 -v");
+    fmt.Println("gbench -url 'GET|www.google.com' -url 'GET|www.yahoo.com' -r 100 -c 10 -v");
 }
 
 func parseUrl(enteredUrl string) (details Url, parseErr error) {
