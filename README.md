@@ -85,7 +85,7 @@ gbench -file ~/benchmarkurl.txt -r 100 -c 10 -v
 
 gbench -url 'GET|www.google.com' -url 'GET|www.yahoo.com' -r 100 -c 10 -v
 
-### Sample Output
+## Sample Output
 
 ```bash
 Benchmark Result:
