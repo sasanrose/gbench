@@ -2,9 +2,19 @@ package main
 
 import (
     "fmt"
+    "time"
+    "math"
 )
 
 func showResult() {
+    endTime := time.Now();
+
+    totalResponseTime = endTime.Sub(startTime);
+
+    averageResponseTime = totalResponseTime.Seconds() / float64(totalTransactions);
+    transactionRate = float64(totalTransactions) / totalResponseTime.Seconds();
+    transferredData = float64(totalLength) / math.Pow(2, 20);
+
     fmt.Println("\n\nBenchmark Result:");
     fmt.Printf("Total Transactions: %v\n", totalTransactions);
     fmt.Printf("Failed Transactions: %v\n", failedTransactions);

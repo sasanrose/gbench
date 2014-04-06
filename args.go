@@ -243,7 +243,7 @@ func parseUrl(enteredUrl string) (details Url, parseErr error) {
     parts := strings.Split(enteredUrl, "|");
 
     if ((len(parts) != 2 && len(parts) != 3) || (strings.ToUpper(parts[0]) != "GET" && strings.ToUpper(parts[0]) != "POST" && strings.ToUpper(parts[0]) != "HEAD")) {
-        parseErr = errors.New("Wrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com");
+        parseErr = errors.New(enteredUrl + "\nWrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com");
     } else {
 
         details.method = strings.ToUpper(parts[0]);

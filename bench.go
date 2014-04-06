@@ -125,7 +125,7 @@ func startBench() {
     urlFailedStats = make(map[string]int);
     urlsResponseTimes = make(map[string]time.Duration);
 
-    t1 := time.Now();
+    startTime = time.Now();
     for i := 0; i <= floor; i++ {
 
         var max int;
@@ -153,12 +153,4 @@ func startBench() {
     for i := 0; i < requests; i++ {
         <-wait;
     }
-
-    t2 := time.Now();
-
-    totalResponseTime = t2.Sub(t1);
-
-    averageResponseTime = totalResponseTime.Seconds() / float64(totalTransactions);
-    transactionRate = float64(totalTransactions) / totalResponseTime.Seconds();
-    transferredData = float64(totalLength) / math.Pow(2, 20);
 }

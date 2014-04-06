@@ -24,6 +24,7 @@ var (
     headers headersList
     verbose bool = false
     disableKeepAlive bool = false
+    startTime time.Time
 )
 
 type Url struct {
@@ -49,7 +50,6 @@ func main() {
             os.Exit(1);
         }
     }()
-
 
     startBench();
     showResult();
