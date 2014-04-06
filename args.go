@@ -139,9 +139,9 @@ func init() {
     flag.IntVar(&concurrent, "c", 1, defaultUsage + " - Shorthand");
 
     // Number of total requests to be sent
-    defaultUsage = "The number of total requests (Default is 0)";
-    flag.IntVar(&requests, "requests", 0, defaultUsage);
-    flag.IntVar(&requests, "r", 0, defaultUsage + " - Shorthand");
+    defaultUsage = "The number of total requests to send (Default is 1)";
+    flag.IntVar(&requests, "requests", 1, defaultUsage);
+    flag.IntVar(&requests, "r", 1, defaultUsage + " - Shorthand");
 
     // To be verbose or not to be
     defaultUsage = "Verbosity (Default is False)";
@@ -170,20 +170,20 @@ func init() {
 
     // Response header timeout
     var tempResponseTimeout int;
-    defaultUsage = "Specifies the amount of time to wait for a server's response headers (Default Zero)";
+    defaultUsage = "Specifies the amount of time to wait for a server's response headers (Default is 0 which means no timeout)";
     flag.IntVar(&tempResponseTimeout, "response-timeout", 0, defaultUsage);
     flag.IntVar(&tempResponseTimeout, "t", 0, defaultUsage + " - Shorthand");
     responseTimeout = time.Duration(tempResponseTimeout) * time.Second;
 
     // Connection timeout
     var tempConnectionTimeout int;
-    defaultUsage = "Specifies the amount of time to wait for establishment of connection (Default Zero)";
+    defaultUsage = "Specifies the amount of time to wait for establishment of connection (Default is 0 which means no timeout)";
     flag.IntVar(&tempConnectionTimeout, "connection-timeout", 0, defaultUsage);
     flag.IntVar(&tempConnectionTimeout, "ct", 0, defaultUsage + " - Shorthand");
     connectionTimeout = time.Duration(tempConnectionTimeout) * time.Second;
 
     // Benchmarking url file
-    defaultUsage = "File containing urls to benchmark. This field is repeatable.";
+    defaultUsage = "Address of file containing urls to benchmark. This field is repeatable.";
     flag.Var(&urls, "file", defaultUsage);
     flag.Var(&urls, "f", defaultUsage + " - Shorthand");
 
