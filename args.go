@@ -213,7 +213,7 @@ func init() {
 
     flag.Parse();
 
-    for _, singleUrl := range urls {
+    for _, singleUrl := range tempUrls {
         urls = append(urls, singleUrl);
     }
 
@@ -275,7 +275,7 @@ func parseUrl(enteredUrl string) (details Url, parseErr error) {
         }
     }
 
-    return details, err;
+    return details, parseErr;
 }
 
 func urlExists(url string) bool {
