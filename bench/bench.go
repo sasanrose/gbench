@@ -4,6 +4,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/sasanrose/gbench/result"
 )
 
 // A bnech represents a new benchmark that we want to execute.
@@ -27,6 +29,8 @@ type Bench struct {
 	ResponseTimeout, ConnectionTimeout time.Duration
 	// Http raw cookie string (i.e. the result of document.cookie).
 	RawCookie string
+	// Result renderer to use
+	Renderer result.Renderer
 }
 
 // A url represents an endpoint that we want to benchmark.

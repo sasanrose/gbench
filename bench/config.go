@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/sasanrose/gbench/result"
 )
 
 const URL_ERROR_MESSAGE = "%s\nWrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com"
@@ -30,6 +32,14 @@ func WithRequests(n int) func(*Bench) {
 func WithURL(u *Url) func(*Bench) {
 	return func(b *Bench) {
 		b.Urls = append(b.Urls, u)
+	}
+}
+
+// Defines what should be considered as a success status code.
+// Default values are: 200, 201, 202
+func WithSuccessStatusCode(code int) func(*Bench) {
+	return func(b *Bench) {
+		b.SuccessStatusCodes = append(b.SuccessStatusCodes, code)
 	}
 }
 
@@ -130,6 +140,13 @@ func WithFile(path string) (func(*Bench), error) {
 	return func(b *Bench) {
 		b.Urls = append(b.Urls, urls...)
 	}, nil
+}
+
+// Sets a result renderer
+func WithRenderer(renderer result.Renderer) func(*Bench) {
+	return func(b *Bench) {
+		b.Renderer = renderer
+	}
 }
 
 func parseUrl(u string) (*Url, error) {

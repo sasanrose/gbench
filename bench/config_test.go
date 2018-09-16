@@ -13,6 +13,8 @@ func TestConfigurations(t *testing.T) {
 		Addr: "testAddr", Method: "GET",
 	}
 
+	r := &mockedRenderer{}
+
 	configurations := []func(*Bench){
 		WithConcurrency(2),
 		WithRequests(4),
@@ -24,6 +26,9 @@ func TestConfigurations(t *testing.T) {
 		WithResponseTimeout(3 * time.Second),
 		WithRawCookie("testCookie"),
 		WithHeader("testKey", "testVal"),
+		WithRenderer(r),
+		WithSuccessStatusCode(100),
+		WithSuccessStatusCode(101),
 	}
 
 	b := NewBench(configurations...)
@@ -66,5 +71,13 @@ func TestConfigurations(t *testing.T) {
 
 	if val, ok := b.Headers["testKey"]; !ok || val != "testVal" {
 		t.Error("Header is not set as expected")
+	}
+
+	if b.Renderer == nil {
+		t.Error("Renderer is not set as expected")
+	}
+
+	if len(b.SuccessStatusCodes) != 2 || b.SuccessStatusCodes[0] != 100 || b.SuccessStatusCodes[1] != 101 {
+		t.Errorf("Success status codes were expected to be set as '100' and '101' but got %v", b.SuccessStatusCodes)
 	}
 }
