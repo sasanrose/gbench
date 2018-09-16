@@ -14,14 +14,14 @@ import (
 
 const URL_ERROR_MESSAGE = "%s\nWrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com"
 
-// Create a config to set number of concurrent requests.
+// Create a config to set number of concurrent requests per Url.
 func WithConcurrency(n int) func(*Bench) {
 	return func(b *Bench) {
 		b.Concurrency = n
 	}
 }
 
-// Create a config to set total number of requests to send.
+// Create a config to set total number of requests to send per Url.
 func WithRequests(n int) func(*Bench) {
 	return func(b *Bench) {
 		b.Requests = n

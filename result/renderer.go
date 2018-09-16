@@ -9,4 +9,5 @@ type Renderer interface {
 	AddResponseTime(url string, time time.Duration)
 	AddResponseStatusCode(url string, statusCode int, failed bool)
 	AddTimedoutResponse(url string)
+	AddFailedResponse(url string)
 }

@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-func getTestResultStruct() *result {
-	r := &result{}
+func getTestResultStruct() *Result {
+	r := &Result{}
 	r.Init()
 
 	return r
@@ -61,6 +61,30 @@ func TestResponseTime(t *testing.T) {
 	if r.responseTime["testUrl1"] != 12*time.Second {
 		t.Fatal("Expected to get '12' seconds for 'testUrl1'")
 	}
+
+	if r.shortestResponseTime != 2*time.Second {
+		t.Fatalf("Expected to get '2' as the shortest response time but got %v", r.shortestResponseTime)
+	}
+
+	if r.longestResponseTime != 20*time.Second {
+		t.Fatalf("Expected to get '20' as the longest response time but got %v", r.longestResponseTime)
+	}
+
+	if r.shortestResponseTimes["testUrl1"] != 2*time.Second {
+		t.Fatalf("Expected to get '2' as the shortest response time for 'testUrl1' but got %v", r.shortestResponseTimes["testUrl1"])
+	}
+
+	if r.shortestResponseTimes["testUrl2"] != 20*time.Second {
+		t.Fatalf("Expected to get '20' as the shortest response time for 'testUrl2' but got %v", r.shortestResponseTimes["testUrl2"])
+	}
+
+	if r.longestResponseTimes["testUrl1"] != 10*time.Second {
+		t.Fatalf("Expected to get '2' as the longest response time for 'testUrl1' but got %v", r.longestResponseTimes["testUrl1"])
+	}
+
+	if r.longestResponseTimes["testUrl2"] != 20*time.Second {
+		t.Fatalf("Expected to get '20' as the longest response time for 'testUrl2' but got %v", r.longestResponseTimes["testUrl2"])
+	}
 }
 
 func TestTotalTime(t *testing.T) {
@@ -91,6 +115,37 @@ func TestTimedoutResponse(t *testing.T) {
 
 	if r.timedoutResponse["testUrl1"] != 2 {
 		t.Fatal("Expected to get '2' for 'testUrl1'")
+	}
+
+	if r.totalRequests != 3 || r.timedOutRequests != 3 {
+		t.Error("Number of total requets and timed out requests are not set as expected")
+	}
+}
+
+func TestFailedResponse(t *testing.T) {
+	r := getTestResultStruct()
+
+	r.AddFailedResponse("testUrl1")
+	if r.failedResponse["testUrl1"] != 1 {
+		t.Fatal("Expected to get '1' for 'testUrl1'")
+	}
+
+	r.AddFailedResponse("testUrl1")
+	if r.failedResponse["testUrl1"] != 2 {
+		t.Fatal("Expected to get '2' for 'testUrl1'")
+	}
+
+	r.AddFailedResponse("testUrl2")
+	if r.failedResponse["testUrl2"] != 1 {
+		t.Fatal("Expected to get '1' for 'testUrl2'")
+	}
+
+	if r.failedResponse["testUrl1"] != 2 {
+		t.Fatal("Expected to get '2' for 'testUrl1'")
+	}
+
+	if r.totalRequests != 3 || r.failedRequests != 3 {
+		t.Error("Number of total requets and failed requests are not set as expected")
 	}
 }
 
@@ -134,5 +189,9 @@ func TestStatusCode(t *testing.T) {
 	r.AddResponseStatusCode("testUrl3", 500, true)
 	if r.failedResponseStatusCode["testUrl3"][500] != 1 {
 		t.Fatal("Expected count '1' for status cude '500' for testUrl3")
+	}
+
+	if r.totalRequests != 7 || r.successfulRequests != 4 || r.failedRequests != 3 {
+		t.Error("Number of total requests, successful requests and failed requests are not set as expected")
 	}
 }

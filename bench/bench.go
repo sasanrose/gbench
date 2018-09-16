@@ -3,6 +3,7 @@ package bench
 import (
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/sasanrose/gbench/result"
@@ -25,6 +26,8 @@ type Bench struct {
 	SuccessStatusCodes []int
 	// Verbosity writer.
 	VerbosityWriter io.Writer
+	// Verbosity writer lock.
+	VerbosityWriterLock *sync.Mutex
 	// Connection and response timeouts
 	ResponseTimeout, ConnectionTimeout time.Duration
 	// Http raw cookie string (i.e. the result of document.cookie).
@@ -66,6 +69,10 @@ func NewBench(configurations ...func(*Bench)) *Bench {
 			http.StatusAccepted,
 			http.StatusCreated,
 		}
+	}
+
+	if b.VerbosityWriter != nil {
+		b.VerbosityWriterLock = &sync.Mutex{}
 	}
 
 	return b

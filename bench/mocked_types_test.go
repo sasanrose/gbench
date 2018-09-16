@@ -2,7 +2,6 @@ package bench
 
 import (
 	"bytes"
-	"time"
 )
 
 type mockedFSType struct {
@@ -29,14 +28,3 @@ func (m mockedFSType) Open(name string) (file, error) {
 
 	return m.file, nil
 }
-
-type mockedRenderer struct{}
-
-func (m *mockedRenderer) Render() error {
-	return nil
-}
-func (m *mockedRenderer) AddReceivedDataLength(url string, contentLength int64)         {}
-func (m *mockedRenderer) SetTotalDuration(duration time.Duration)                       {}
-func (m *mockedRenderer) AddResponseTime(url string, time time.Duration)                {}
-func (m *mockedRenderer) AddResponseStatusCode(url string, statusCode int, failed bool) {}
-func (m *mockedRenderer) AddTimedoutResponse(url string)                                {}

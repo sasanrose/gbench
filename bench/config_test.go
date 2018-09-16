@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"testing"
 	"time"
+
+	"github.com/sasanrose/gbench/result"
 )
 
 func TestConfigurations(t *testing.T) {
@@ -13,7 +15,7 @@ func TestConfigurations(t *testing.T) {
 		Addr: "testAddr", Method: "GET",
 	}
 
-	r := &mockedRenderer{}
+	r := result.NewMockRenderer()
 
 	configurations := []func(*Bench){
 		WithConcurrency(2),
