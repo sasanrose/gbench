@@ -64,21 +64,18 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 
 	if err != nil {
 		if err, ok := err.(*url.Error); ok && err.Timeout() {
-			go b.Renderer.AddTimedoutResponse(reqUrl)
+			b.printVerbosityMessage(fmt.Sprintf("Timed out request for %s: %v\n", reqUrl, err))
+			b.Renderer.AddTimedoutResponse(reqUrl)
 			return
 		}
 
-		go b.printVerbosityMessage(fmt.Sprintf("Error for %s: %v\n", reqUrl, err))
-		go b.Renderer.AddFailedResponse(reqUrl)
+		b.printVerbosityMessage(fmt.Sprintf("Error for %s: %v\n", reqUrl, err))
+		b.Renderer.AddFailedResponse(reqUrl)
 		return
 	}
 
 	defer resp.Body.Close()
 
-	go b.updateResult(reqUrl, resp, responseTime)
-}
-
-func (b *Bench) updateResult(reqUrl string, resp *http.Response, responseTime time.Duration) {
 	b.Renderer.AddResponseTime(reqUrl, responseTime)
 	b.Renderer.AddReceivedDataLength(reqUrl, resp.ContentLength)
 	b.Renderer.AddResponseStatusCode(reqUrl, resp.StatusCode, b.isFailed(resp.StatusCode))
@@ -88,8 +85,8 @@ func (b *Bench) updateResult(reqUrl string, resp *http.Response, responseTime ti
 func (b *Bench) printVerbosityMessage(msg string) {
 	if b.VerbosityWriter != nil {
 		b.VerbosityWriterLock.Lock()
+		defer b.VerbosityWriterLock.Unlock()
 		fmt.Fprint(b.VerbosityWriter, msg)
-		b.VerbosityWriterLock.Unlock()
 	}
 }
 
