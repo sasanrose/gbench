@@ -38,6 +38,10 @@ func TestContentLength(t *testing.T) {
 	if r.receivedDataLength["testUrl1"] != 12 {
 		t.Fatal("Expected to get '12' for 'testUrl1'")
 	}
+
+	if r.totalReceivedDataLength != 32 {
+		t.Fatal("Expected to get 32 as totalReceivedDataLength")
+	}
 }
 
 func TestResponseTime(t *testing.T) {
@@ -56,6 +60,10 @@ func TestResponseTime(t *testing.T) {
 	r.AddResponseTime("testUrl2", 20*time.Second)
 	if r.responseTime["testUrl2"] != 20*time.Second {
 		t.Fatal("Expected to get '20' seconds for 'testUrl2'")
+	}
+
+	if r.totalResponseTime != 32*time.Second {
+		t.Fatal("Expected to get 32 as totalResponseTime")
 	}
 
 	if r.responseTime["testUrl1"] != 12*time.Second {
@@ -84,6 +92,18 @@ func TestResponseTime(t *testing.T) {
 
 	if r.longestResponseTimes["testUrl2"] != 20*time.Second {
 		t.Fatalf("Expected to get '20' as the longest response time for 'testUrl2' but got %v", r.longestResponseTimes["testUrl2"])
+	}
+
+	if r.responseTimesTotalCount != 3 {
+		t.Errorf("Expected to get 3 for responseTimesTotalCount but got %d", r.responseTimesTotalCount)
+	}
+
+	if r.responseTimesCount["testUrl1"] != 2 {
+		t.Errorf("Expected to get 2 for responseTimesCount for testUrl1 but got %d", r.responseTimesCount["testUrl1"])
+	}
+
+	if r.responseTimesCount["testUrl2"] != 1 {
+		t.Errorf("Expected to get 1 for responseTimesCount for testUrl2 but got %d", r.responseTimesCount["testUrl1"])
 	}
 }
 
@@ -127,6 +147,8 @@ func TestTimedoutResponse(t *testing.T) {
 
 	checkConcurrencyResult(t, r.concurrencyResult["testUrl1"][0], 2, 0, 0, 2)
 	checkConcurrencyResult(t, r.concurrencyResult["testUrl2"][0], 1, 0, 0, 1)
+
+	checkUrls(t, r, []string{"testUrl1", "testUrl2"})
 }
 
 func TestFailedResponse(t *testing.T) {
@@ -161,6 +183,8 @@ func TestFailedResponse(t *testing.T) {
 
 	checkConcurrencyResult(t, r.concurrencyResult["testUrl1"][0], 2, 0, 2, 0)
 	checkConcurrencyResult(t, r.concurrencyResult["testUrl2"][0], 1, 0, 1, 0)
+
+	checkUrls(t, r, []string{"testUrl1", "testUrl2"})
 }
 
 func TestStatusCode(t *testing.T) {
@@ -220,6 +244,8 @@ func TestStatusCode(t *testing.T) {
 	checkConcurrencyResult(t, r.concurrencyResult["testUrl2"][0], 2, 1, 1, 0)
 	checkConcurrencyResult(t, r.concurrencyResult["testUrl2"][1], 1, 0, 1, 0)
 	checkConcurrencyResult(t, r.concurrencyResult["testUrl3"][0], 1, 0, 1, 0)
+
+	checkUrls(t, r, []string{"testUrl1", "testUrl2", "testUrl3"})
 }
 
 func checkConcurrencyResult(t *testing.T,
@@ -243,5 +269,13 @@ func checkConcurrencyResult(t *testing.T,
 
 	if result.timedOutRequests != timedOutRequests {
 		t.Errorf("Expected to get %d for timedOutRequests but got %d", timedOutRequests, result.timedOutRequests)
+	}
+}
+
+func checkUrls(t *testing.T, result *Result, expectedUrls []string) {
+	for _, url := range expectedUrls {
+		if _, ok := result.urls[url]; !ok {
+			t.Errorf("Expected to see %s in the list of urls", url)
+		}
 	}
 }
