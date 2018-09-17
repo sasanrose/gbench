@@ -10,4 +10,5 @@ type Renderer interface {
 	AddResponseStatusCode(url string, statusCode int, failed bool)
 	AddTimedoutResponse(url string)
 	AddFailedResponse(url string)
+	Init(concurrency int)
 }
