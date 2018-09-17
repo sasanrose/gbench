@@ -15,44 +15,43 @@ import (
 // Executes a benchmark. The context is used to cancel the benchmark at any
 // given time.
 func (b *Bench) Exec(ctx context.Context) error {
-	wg := &sync.WaitGroup{}
-	waitChannel := make(chan struct{})
-
 	client := b.getClient()
 	remainingRequests := b.Requests
 	t := time.Now()
 
 	for remainingRequests > 0 {
-		remainingConcurrent := b.Concurrency
-		for remainingConcurrent > 0 && remainingRequests > 0 {
-			for _, url := range b.Urls {
-				req := b.buildRequest(url)
-				req = req.WithContext(ctx)
-				wg.Add(1)
-				go b.runBench(wg, client, req)
-			}
-			remainingRequests--
-			remainingConcurrent--
+		waitChannel := make(chan struct{})
+		go b.runConcurrentJobs(ctx, waitChannel, client, &remainingRequests)
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-waitChannel:
+			continue
 		}
 	}
-
-	go func() {
-		defer close(waitChannel)
-		wg.Wait()
-	}()
 
 	defer func() {
 		b.Renderer.SetTotalDuration(time.Since(t))
 	}()
 
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-waitChannel:
-		return nil
-	}
-
 	return nil
+}
+
+func (b *Bench) runConcurrentJobs(ctx context.Context, waitChannel chan struct{}, client *http.Client, remainingRequests *int) {
+	wg := &sync.WaitGroup{}
+	remainingConcurrent := b.Concurrency
+	for remainingConcurrent > 0 && *remainingRequests > 0 {
+		for _, url := range b.Urls {
+			req := b.buildRequest(url)
+			req = req.WithContext(ctx)
+			wg.Add(1)
+			go b.runBench(wg, client, req)
+		}
+		(*remainingRequests)--
+		remainingConcurrent--
+	}
+	wg.Wait()
+	close(waitChannel)
 }
 
 func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Request) {
@@ -65,17 +64,21 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 
 	if err != nil {
 		if err, ok := err.(*url.Error); ok && err.Timeout() {
-			b.Renderer.AddTimedoutResponse(reqUrl)
+			go b.Renderer.AddTimedoutResponse(reqUrl)
 			return
 		}
 
-		b.printVerbosityMessage(fmt.Sprintf("Error for %s: %v\n", reqUrl, err))
-		b.Renderer.AddFailedResponse(reqUrl)
+		go b.printVerbosityMessage(fmt.Sprintf("Error for %s: %v\n", reqUrl, err))
+		go b.Renderer.AddFailedResponse(reqUrl)
 		return
 	}
 
 	defer resp.Body.Close()
 
+	go b.updateResult(reqUrl, resp, responseTime)
+}
+
+func (b *Bench) updateResult(reqUrl string, resp *http.Response, responseTime time.Duration) {
 	b.Renderer.AddResponseTime(reqUrl, responseTime)
 	b.Renderer.AddReceivedDataLength(reqUrl, resp.ContentLength)
 	b.Renderer.AddResponseStatusCode(reqUrl, resp.StatusCode, b.isFailed(resp.StatusCode))
