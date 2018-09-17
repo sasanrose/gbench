@@ -75,5 +75,13 @@ func NewBench(configurations ...func(*Bench)) *Bench {
 		b.VerbosityWriterLock = &sync.Mutex{}
 	}
 
+	if b.Concurrency == 0 {
+		b.Concurrency = 1
+	}
+
+	if b.Requests == 0 {
+		b.Requests = 1
+	}
+
 	return b
 }

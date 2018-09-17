@@ -19,6 +19,12 @@ type MockedResult struct {
 	ResponseTime                                map[string]time.Duration
 	ShortestResponseTimes, LongestResponseTimes map[string]time.Duration
 	ShortestResponseTime, LongestResponseTime   time.Duration
+
+	ConcurrencyResult map[string][]*MockedConcurrencyResult
+}
+
+type MockedConcurrencyResult struct {
+	TotalRequests, SuccessfulRequests, FailedRequests, TimedOutRequests int
 }
 
 func NewMockRenderer() *mockedRenderer {
@@ -42,6 +48,21 @@ func (m *mockedRenderer) Render() error {
 		LongestResponseTime:      m.longestResponseTime,
 		ShortestResponseTimes:    m.shortestResponseTimes,
 		LongestResponseTimes:     m.longestResponseTimes,
+		ConcurrencyResult:        make(map[string][]*MockedConcurrencyResult),
+	}
+
+	for url, concurrencyResults := range m.concurrencyResult {
+		if _, ok := m.BenchResult.ConcurrencyResult[url]; !ok {
+			m.BenchResult.ConcurrencyResult[url] = make([]*MockedConcurrencyResult, 0)
+		}
+		for _, concurrencyResult := range concurrencyResults {
+			m.BenchResult.ConcurrencyResult[url] = append(m.BenchResult.ConcurrencyResult[url], &MockedConcurrencyResult{
+				concurrencyResult.totalRequests,
+				concurrencyResult.successfulRequests,
+				concurrencyResult.failedRequests,
+				concurrencyResult.timedOutRequests,
+			})
+		}
 	}
 
 	return nil

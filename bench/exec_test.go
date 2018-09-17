@@ -29,6 +29,11 @@ type expectedResult struct {
 	responseStatusCode, failedResponseStatusCode                        map[string]map[int]int
 	timedoutResponse, failedResponse                                    map[string]int
 	totalRequests, successfulRequests, failedRequests, timedOutRequests int
+	concurrencyResult                                                   map[string][]*expectedConcurrencyResult
+}
+
+type expectedConcurrencyResult struct {
+	totalRequests, successfulRequests, failedRequests, timedOutRequests int
 }
 
 func newTestHttp(statusCode int) *testHttp {
@@ -82,7 +87,7 @@ func TestExec(t *testing.T) {
 	defer ts3.Close()
 
 	r := result.NewMockRenderer()
-	r.Init()
+	r.Init(2)
 
 	url1 := ts1.URL + "/one"
 	url2 := ts2.URL + "/two"
@@ -134,6 +139,20 @@ func TestExec(t *testing.T) {
 		successfulRequests: 8,
 		failedRequests:     4,
 		timedOutRequests:   0,
+		concurrencyResult: map[string][]*expectedConcurrencyResult{
+			url1: []*expectedConcurrencyResult{
+				&expectedConcurrencyResult{2, 2, 0, 0},
+				&expectedConcurrencyResult{2, 2, 0, 0},
+			},
+			url2: []*expectedConcurrencyResult{
+				&expectedConcurrencyResult{2, 2, 0, 0},
+				&expectedConcurrencyResult{2, 2, 0, 0},
+			},
+			url3: []*expectedConcurrencyResult{
+				&expectedConcurrencyResult{2, 0, 2, 0},
+				&expectedConcurrencyResult{2, 0, 2, 0},
+			},
+		},
 	}
 
 	checkResult(t, r.BenchResult, expected)
@@ -230,6 +249,27 @@ func checkResult(t *testing.T, r *result.MockedResult, expected *expectedResult)
 
 	checkStatusCodes(t, r.ResponseStatusCode, expected.responseStatusCode, "responseStatusCode")
 	checkStatusCodes(t, r.FailedResponseStatusCode, expected.failedResponseStatusCode, "failedResponseStatusCode")
+
+	for url, expectedConcurrencyResults := range expected.concurrencyResult {
+		if _, ok := r.ConcurrencyResult[url]; !ok {
+			t.Errorf("Expected to get a concurrencyResult for %s but got nothing", url)
+			continue
+		}
+
+		for key, expectedConcurrencyResult := range expectedConcurrencyResults {
+			if expectedConcurrencyResult.failedRequests != r.ConcurrencyResult[url][key].FailedRequests ||
+				expectedConcurrencyResult.totalRequests != r.ConcurrencyResult[url][key].TotalRequests ||
+				expectedConcurrencyResult.successfulRequests != r.ConcurrencyResult[url][key].SuccessfulRequests ||
+				expectedConcurrencyResult.timedOutRequests != r.ConcurrencyResult[url][key].TimedOutRequests {
+				t.Errorf("Expected to get %+v for %s in concurrency Result index %d but got %+v",
+					expectedConcurrencyResult,
+					url,
+					key,
+					r.ConcurrencyResult[url][key])
+
+			}
+		}
+	}
 }
 
 func checkStatusCodes(t *testing.T, statusCodes, expectedStatusCodes map[string]map[int]int, fieldName string) {

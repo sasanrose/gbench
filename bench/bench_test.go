@@ -34,7 +34,7 @@ func TestNewBenchWithConfig(t *testing.T) {
 	}
 }
 
-func TestDefaultSuccessStatusCodes(t *testing.T) {
+func TestDefaults(t *testing.T) {
 	b := NewBench()
 	expected := []int{
 		http.StatusOK,
@@ -50,5 +50,13 @@ func TestDefaultSuccessStatusCodes(t *testing.T) {
 		if v != b.SuccessStatusCodes[k] {
 			t.Errorf("Wrong default status code. Expected %d but got %d", v, b.SuccessStatusCodes[k])
 		}
+	}
+
+	if b.Concurrency != 1 {
+		t.Errorf("Wrong default concurrency. Expected to get 1 but got %d", b.Concurrency)
+	}
+
+	if b.Requests != 1 {
+		t.Errorf("Wrong default requests. Expected to get 1 but got %d", b.Requests)
 	}
 }

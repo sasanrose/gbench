@@ -2,6 +2,7 @@ package result
 
 import (
 	"io"
+	"math"
 	"sync"
 	"time"
 )
@@ -19,10 +20,18 @@ type Result struct {
 	shortestResponseTimes, longestResponseTimes map[string]time.Duration
 	shortestResponseTime, longestResponseTime   time.Duration
 
+	concurrencyResult  map[string][]*concurrencyResult
+	concurrencyCounter map[string]int
+	concurrency        int
+
 	lock *sync.Mutex
 }
 
-func (r *Result) Init() {
+type concurrencyResult struct {
+	totalRequests, successfulRequests, failedRequests, timedOutRequests int
+}
+
+func (r *Result) Init(concurrency int) {
 	r.responseTime = make(map[string]time.Duration)
 	r.receivedDataLength = make(map[string]int64)
 	r.responseStatusCode = make(map[string]map[int]int)
@@ -31,6 +40,10 @@ func (r *Result) Init() {
 	r.failedResponse = make(map[string]int)
 	r.shortestResponseTimes = make(map[string]time.Duration)
 	r.longestResponseTimes = make(map[string]time.Duration)
+	r.concurrency = concurrency
+
+	r.concurrencyResult = make(map[string][]*concurrencyResult)
+	r.concurrencyCounter = make(map[string]int)
 
 	r.lock = &sync.Mutex{}
 }
@@ -116,11 +129,13 @@ func (r *Result) AddResponseStatusCode(url string, statusCode int, failed bool) 
 	r.totalRequests++
 
 	if failed {
+		r.updateConcurrencyResult(url, 0, 1, 0)
 		r.failedRequests++
 		updateStatusCode(&(*r).failedResponseStatusCode, url, statusCode)
 		return
 	}
 
+	r.updateConcurrencyResult(url, 1, 0, 0)
 	r.successfulRequests++
 	updateStatusCode(&(*r).responseStatusCode, url, statusCode)
 }
@@ -143,6 +158,8 @@ func (r *Result) AddTimedoutResponse(url string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
+	r.updateConcurrencyResult(url, 0, 0, 1)
+
 	r.timedOutRequests++
 	r.totalRequests++
 
@@ -159,6 +176,8 @@ func (r *Result) AddFailedResponse(url string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
+	r.updateConcurrencyResult(url, 0, 1, 0)
+
 	r.failedRequests++
 	r.totalRequests++
 
@@ -168,4 +187,36 @@ func (r *Result) AddFailedResponse(url string) {
 	}
 
 	r.failedResponse[url] = 1
+}
+
+func (r *Result) updateConcurrencyResult(url string, successfulRequests, failedRequests, timedOutRequests int) {
+	if r.concurrency == 0 {
+		return
+	}
+
+	defer func() {
+		r.concurrencyCounter[url]++
+	}()
+
+	if _, ok := r.concurrencyResult[url]; !ok {
+		r.concurrencyResult[url] = make([]*concurrencyResult, 0)
+		r.concurrencyCounter[url] = 0
+	}
+
+	if r.concurrencyCounter[url] == 0 || int(math.Mod(float64(r.concurrencyCounter[url]), float64(r.concurrency))) == 0 {
+		r.concurrencyResult[url] = append(r.concurrencyResult[url], &concurrencyResult{
+			totalRequests:      1,
+			successfulRequests: successfulRequests,
+			failedRequests:     failedRequests,
+			timedOutRequests:   timedOutRequests,
+		})
+		return
+	}
+
+	lenResult := len(r.concurrencyResult[url])
+
+	r.concurrencyResult[url][lenResult-1].totalRequests++
+	r.concurrencyResult[url][lenResult-1].failedRequests += failedRequests
+	r.concurrencyResult[url][lenResult-1].successfulRequests += successfulRequests
+	r.concurrencyResult[url][lenResult-1].timedOutRequests += timedOutRequests
 }

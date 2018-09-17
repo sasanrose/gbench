@@ -7,7 +7,7 @@ import (
 
 func getTestResultStruct() *Result {
 	r := &Result{}
-	r.Init()
+	r.Init(2)
 
 	return r
 }
@@ -120,6 +120,13 @@ func TestTimedoutResponse(t *testing.T) {
 	if r.totalRequests != 3 || r.timedOutRequests != 3 {
 		t.Error("Number of total requets and timed out requests are not set as expected")
 	}
+
+	if len(r.concurrencyResult["testUrl1"]) != 1 || len(r.concurrencyResult["testUrl2"]) != 1 {
+		t.Error("Wrong concurrencyResult")
+	}
+
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl1"][0], 2, 0, 0, 2)
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl2"][0], 1, 0, 0, 1)
 }
 
 func TestFailedResponse(t *testing.T) {
@@ -147,6 +154,13 @@ func TestFailedResponse(t *testing.T) {
 	if r.totalRequests != 3 || r.failedRequests != 3 {
 		t.Error("Number of total requets and failed requests are not set as expected")
 	}
+
+	if len(r.concurrencyResult["testUrl1"]) != 1 || len(r.concurrencyResult["testUrl2"]) != 1 {
+		t.Error("Wrong concurrencyResult")
+	}
+
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl1"][0], 2, 0, 2, 0)
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl2"][0], 1, 0, 1, 0)
 }
 
 func TestStatusCode(t *testing.T) {
@@ -162,14 +176,14 @@ func TestStatusCode(t *testing.T) {
 		t.Fatal("Expected count '2' for status cude '200' for testUrl1")
 	}
 
-	r.AddResponseStatusCode("testUrl1", 201, false)
-	if r.responseStatusCode["testUrl1"][201] != 1 {
-		t.Fatal("Expected count '1' for status cude '201' for testUrl1")
-	}
-
 	r.AddResponseStatusCode("testUrl2", 200, false)
 	if r.responseStatusCode["testUrl2"][200] != 1 {
 		t.Fatal("Expected count '1' for status cude '200' for testUrl2")
+	}
+
+	r.AddResponseStatusCode("testUrl1", 201, false)
+	if r.responseStatusCode["testUrl1"][201] != 1 {
+		t.Fatal("Expected count '1' for status cude '201' for testUrl1")
 	}
 
 	if len(r.failedResponseStatusCode) != 0 {
@@ -193,5 +207,41 @@ func TestStatusCode(t *testing.T) {
 
 	if r.totalRequests != 7 || r.successfulRequests != 4 || r.failedRequests != 3 {
 		t.Error("Number of total requests, successful requests and failed requests are not set as expected")
+	}
+
+	if len(r.concurrencyResult["testUrl1"]) != 2 ||
+		len(r.concurrencyResult["testUrl2"]) != 2 ||
+		len(r.concurrencyResult["testUrl3"]) != 1 {
+		t.Error("Wrong concurrencyResult")
+	}
+
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl1"][0], 2, 2, 0, 0)
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl1"][1], 1, 1, 0, 0)
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl2"][0], 2, 1, 1, 0)
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl2"][1], 1, 0, 1, 0)
+	checkConcurrencyResult(t, r.concurrencyResult["testUrl3"][0], 1, 0, 1, 0)
+}
+
+func checkConcurrencyResult(t *testing.T,
+	result *concurrencyResult,
+	totalRequests,
+	successfulRequests,
+	failedRequests,
+	timedOutRequests int) {
+
+	if result.failedRequests != failedRequests {
+		t.Errorf("Expected to get %d for failedRequests but got %d", failedRequests, result.failedRequests)
+	}
+
+	if result.totalRequests != totalRequests {
+		t.Errorf("Expected to get %d for totalRequests but got %d", totalRequests, result.totalRequests)
+	}
+
+	if result.successfulRequests != successfulRequests {
+		t.Errorf("Expected to get %d for successfulRequests but got %d", successfulRequests, result.successfulRequests)
+	}
+
+	if result.timedOutRequests != timedOutRequests {
+		t.Errorf("Expected to get %d for timedOutRequests but got %d", timedOutRequests, result.timedOutRequests)
 	}
 }
