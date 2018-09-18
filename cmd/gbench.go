@@ -34,7 +34,7 @@ func main() {
 		fileConfig, err := bench.WithFile(file)
 
 		if err != nil {
-			log.Fatalf("Error reading file: %v")
+			log.Fatalf("Error reading file: %v", err)
 		}
 
 		configurations = append(configurations, fileConfig)
