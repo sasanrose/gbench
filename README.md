@@ -16,7 +16,7 @@ go build cmd/* -o gbench
 ```
 
 ## Usage of Gbench:                                                                                                            
-Command line parameters:
+```
       --auth-password string          Password for basic HTTP authentication.                                                                                                                
       --auth-username string          Username for basic HTTP authentication.
   -c, --concurrent int                Number of concurrent requests. (default 1)
@@ -41,3 +41,4 @@ Examples:
 
 gbench -file ~/benchmarkurl.txt -r 100 -c 10 -v
 gbench -url 'GET|www.google.com' -url 'GET|www.google.com/path2' -r 100 -c 10 -v
+```
