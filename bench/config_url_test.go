@@ -95,6 +95,27 @@ func TestFile(t *testing.T) {
 	checkTestResult(b, t)
 }
 
+func TestFileNoUrls(t *testing.T) {
+	oldFs := fs
+	mfs := &mockedFSType{}
+	fs = mfs
+
+	defer func() {
+		fs = oldFs
+	}()
+
+	fileContent := ""
+
+	mockedFile := &mockedFileType{bytes.NewBufferString(fileContent)}
+	mfs.file = mockedFile
+
+	_, err := WithFile("/test/file")
+
+	if err == nil || !strings.Contains(err.Error(), "Did not find any url in the") {
+		t.Errorf("Expected to get an error for empty urls slice")
+	}
+}
+
 func TestUrlString(t *testing.T) {
 	configurations := []func(*Bench){}
 
@@ -154,7 +175,6 @@ func TestWrongUrls(t *testing.T) {
 		"wrong":                                      "Wrong URL format",
 		"part1|part2|part3|wrongpart":                "Wrong URL format",
 		"wrongmethod|part2|part3":                    "Not an allowed method provided",
-		"GET|wrongurl":                               "Invalid URL provided",
 		"GET|ftp://www.google.com":                   "Only http and https schemes are supported",
 		"GET|https://www.google.com|part3":           "GET and HEAD do not need any data",
 		"POST|https://www.google.com":                "You need to provide post data",

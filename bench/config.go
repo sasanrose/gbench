@@ -111,6 +111,18 @@ func WithHeader(key, value string) func(*Bench) {
 	}
 }
 
+// Set http headers using a string in key=value format.
+// Note: This will be used for all the provided urls.
+func WithHeaderString(header string) (func(*Bench), error) {
+	keyValue := strings.Split(header, "=")
+
+	if len(keyValue) != 2 {
+		return nil, fmt.Errorf("%s is not a correct key=value format", header)
+	}
+
+	return WithHeader(keyValue[0], keyValue[1]), nil
+}
+
 // Set endpoints from a file. The file is expected to have a string as defined
 // in WithURLString in each line.
 func WithFile(path string) (func(*Bench), error) {
@@ -135,6 +147,10 @@ func WithFile(path string) (func(*Bench), error) {
 		}
 
 		urls = append(urls, parsedUrl)
+	}
+
+	if len(urls) == 0 {
+		return nil, fmt.Errorf("Did not find any url in the %s", path)
 	}
 
 	return func(b *Bench) {
@@ -162,7 +178,7 @@ func parseUrl(u string) (*Url, error) {
 		return nil, fmt.Errorf("Not an allowed method provided for: %s", u)
 	}
 
-	urlStruct, err := url.ParseRequestURI(parts[1])
+	urlStruct, err := url.Parse(parts[1])
 	if err != nil {
 		return nil, fmt.Errorf("Invalid URL provided: %v", err)
 	}

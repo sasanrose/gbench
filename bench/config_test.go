@@ -17,6 +17,18 @@ func TestConfigurations(t *testing.T) {
 
 	r := result.NewMockRenderer()
 
+	_, err := WithHeaderString("wrongformat")
+
+	if err == nil {
+		t.Error("Expected to get an error for wrong header format")
+	}
+
+	hConfig, err := WithHeaderString("fooKey=barVal")
+
+	if err != nil {
+		t.Error("Unexpected error for correct header format")
+	}
+
 	configurations := []func(*Bench){
 		WithConcurrency(2),
 		WithRequests(4),
@@ -28,6 +40,7 @@ func TestConfigurations(t *testing.T) {
 		WithResponseTimeout(3 * time.Second),
 		WithRawCookie("testCookie"),
 		WithHeader("testKey", "testVal"),
+		hConfig,
 		WithRenderer(r),
 		WithSuccessStatusCode(100),
 		WithSuccessStatusCode(101),
@@ -72,6 +85,10 @@ func TestConfigurations(t *testing.T) {
 	}
 
 	if val, ok := b.Headers["testKey"]; !ok || val != "testVal" {
+		t.Error("Header is not set as expected")
+	}
+
+	if val, ok := b.Headers["fooKey"]; !ok || val != "barVal" {
 		t.Error("Header is not set as expected")
 	}
 
