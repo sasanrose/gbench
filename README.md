@@ -14,8 +14,10 @@ You need [Golang](https://golang.org) installed and ready on your system.
 go install github.com/sasanrose/gbench
 ```
 
-## Usage of Gbench:                                                                                                            
-```
+## Usage:                                                                                                            
+```bash
+$ gbench -h
+Usage of Gbench:
       --auth-password string          Password for basic HTTP authentication.                                                                                                                
       --auth-username string          Username for basic HTTP authentication.
   -c, --concurrent int                Number of concurrent requests. (default 1)
