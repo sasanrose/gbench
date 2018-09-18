@@ -10,9 +10,7 @@ You need [GO](https://golang.org) installed and ready on your system.
 ## Installation
 
 ```bash
-git clone git@github.com/sasanrose/gbench
-cd gbench
-go build cmd/* -o gbench
+go install github.com/sasanrose/gbench
 ```
 
 ## Usage of Gbench:                                                                                                            
