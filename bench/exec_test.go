@@ -124,7 +124,6 @@ func TestExec(t *testing.T) {
 		receivedDataLength: map[string]int64{
 			url1: 36,
 			url2: 36,
-			url3: 36,
 		},
 		responseStatusCode: map[string]map[int]int{
 			url1: map[int]int{http.StatusOK: 4},

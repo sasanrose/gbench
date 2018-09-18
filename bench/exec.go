@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -76,10 +77,17 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 
 	defer resp.Body.Close()
 
+	contentLength := 0
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err == nil {
+		contentLength = len(body)
+	}
+
 	b.Renderer.AddResponseTime(reqUrl, responseTime)
-	b.Renderer.AddReceivedDataLength(reqUrl, resp.ContentLength)
+	b.Renderer.AddReceivedDataLength(reqUrl, int64(contentLength))
 	b.Renderer.AddResponseStatusCode(reqUrl, resp.StatusCode, b.isFailed(resp.StatusCode))
-	b.printVerbosityMessage(fmt.Sprintf("Sent requests for %s in %v: %s\n", reqUrl, responseTime, http.StatusText(resp.StatusCode)))
+	b.printVerbosityMessage(fmt.Sprintf("Recieved response for sent requests to %s in %v. Status: %s\n", reqUrl, responseTime, http.StatusText(resp.StatusCode)))
 }
 
 func (b *Bench) printVerbosityMessage(msg string) {
