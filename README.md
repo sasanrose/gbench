@@ -6,7 +6,7 @@ HTTP Load Testing And Benchmarking Tool inspired by Apache Benchmark and Siege.
 
 ## Requirements
 
-You need [GO](https://golang.org) installed and ready on your system.
+You need [Golang](https://golang.org) installed and ready on your system.
 
 ## Installation
 
