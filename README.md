@@ -1,5 +1,6 @@
 GBench
 ======
+[![Build Status](https://travis-ci.org/sasanrose/gbench.svg?branch=master)](https://travis-ci.org/sasanrose/gbench)
 
 HTTP Load Testing And Benchmarking Tool inspired by Apache Benchmark and Siege.
 
