@@ -1,6 +1,6 @@
 GBench
 ======
-[![Build Status](https://travis-ci.org/sasanrose/gbench.svg?branch=master)](https://travis-ci.org/sasanrose/gbench)
+[![Build Status](https://travis-ci.org/sasanrose/gbench.svg?branch=master)](https://travis-ci.org/sasanrose/gbench) [![Coverage Status](https://coveralls.io/repos/github/sasanrose/gbench/badge.svg?branch=master)](https://coveralls.io/github/sasanrose/gbench?branch=master)
 
 HTTP Load Testing And Benchmarking Tool inspired by Apache Benchmark and Siege.
 
