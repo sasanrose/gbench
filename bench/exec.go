@@ -22,6 +22,8 @@ func (b *Bench) Exec(ctx context.Context) error {
 
 	for remainingRequests > 0 {
 		waitChannel := make(chan struct{})
+		doneReqs := b.Requests - remainingRequests
+		b.printVerbosityMessage(fmt.Sprintf("%d of %d (%.1f%%)\n", doneReqs, b.Requests, float64(doneReqs*b.Requests)/100))
 		go b.runConcurrentJobs(ctx, waitChannel, client, &remainingRequests)
 		select {
 		case <-ctx.Done():
