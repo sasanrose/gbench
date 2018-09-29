@@ -1,9 +1,8 @@
-package result
+package report
 
 import "time"
 
-type Renderer interface {
-	Render() error
+type Report interface {
 	AddReceivedDataLength(url string, contentLength int64)
 	SetTotalDuration(duration time.Duration)
 	AddResponseTime(url string, time time.Duration)
@@ -11,4 +10,6 @@ type Renderer interface {
 	AddTimedoutResponse(url string)
 	AddFailedResponse(url string)
 	Init(concurrency int)
+	SetStartTime(t time.Time)
+	SetEndTime(t time.Time)
 }

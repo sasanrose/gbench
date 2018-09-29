@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sasanrose/gbench/result"
+	"github.com/sasanrose/gbench/report"
 )
 
 func TestConfigurations(t *testing.T) {
@@ -15,7 +15,7 @@ func TestConfigurations(t *testing.T) {
 		Addr: "testAddr", Method: "GET",
 	}
 
-	r := result.NewMockRenderer()
+	r := &report.Result{}
 
 	_, err := WithHeaderString("wrongformat")
 
@@ -41,7 +41,7 @@ func TestConfigurations(t *testing.T) {
 		WithRawCookie("testCookie"),
 		WithHeader("testKey", "testVal"),
 		hConfig,
-		WithRenderer(r),
+		WithReport(r),
 		WithSuccessStatusCode(100),
 		WithSuccessStatusCode(101),
 	}
@@ -92,8 +92,8 @@ func TestConfigurations(t *testing.T) {
 		t.Error("Header is not set as expected")
 	}
 
-	if b.Renderer == nil {
-		t.Error("Renderer is not set as expected")
+	if b.Report == nil {
+		t.Error("Report is not set as expected")
 	}
 
 	if len(b.SuccessStatusCodes) != 2 || b.SuccessStatusCodes[0] != 100 || b.SuccessStatusCodes[1] != 101 {

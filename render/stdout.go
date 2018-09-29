@@ -1,23 +1,23 @@
-package result
+package render
 
 import (
 	"fmt"
+	"io"
 	"os"
+
+	"github.com/sasanrose/gbench/report"
 )
 
 type stdout struct {
-	Result
+	output io.Writer
 }
 
 func NewStdoutRenderer() Renderer {
-	r := &stdout{}
-	r.output = os.Stdout
-
-	return r
+	return &stdout{os.Stdout}
 }
 
-func (r *stdout) Render() error {
-	tableGen := &tableGenerator{&r.Result}
+func (r *stdout) Render(result *report.Result) error {
+	tableGen := &tableGenerator{result}
 	table := tableGen.getBenchResultTable()
 	urlTables := tableGen.getUrlTables()
 	concurrencyTables := tableGen.getConcurrencyTables()
