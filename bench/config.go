@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sasanrose/gbench/result"
+	"github.com/sasanrose/gbench/report"
 )
 
 const URL_ERROR_MESSAGE = "%s\nWrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com"
@@ -158,10 +158,10 @@ func WithFile(path string) (func(*Bench), error) {
 	}, nil
 }
 
-// Sets a result renderer
-func WithRenderer(renderer result.Renderer) func(*Bench) {
+// Sets a result report
+func WithReport(report report.Report) func(*Bench) {
 	return func(b *Bench) {
-		b.Renderer = renderer
+		b.Report = report
 	}
 }
 

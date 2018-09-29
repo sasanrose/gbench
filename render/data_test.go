@@ -1,7 +1,9 @@
-package result
+package render
 
 import (
 	"time"
+
+	"github.com/sasanrose/gbench/report"
 )
 
 type testResponse struct {
@@ -35,7 +37,7 @@ var testData map[string][]*testResponse = map[string][]*testResponse{
 	},
 }
 
-func addTestData(r Renderer) {
+func addTestData(r *report.Result) {
 	for url, responses := range testData {
 		for _, response := range responses {
 			if response.timedOut {
