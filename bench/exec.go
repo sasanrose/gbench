@@ -34,7 +34,7 @@ func (b *Bench) Exec(ctx context.Context) error {
 	}
 
 	defer func() {
-		b.Renderer.SetTotalDuration(time.Since(t))
+		b.Report.SetTotalDuration(time.Since(t))
 	}()
 
 	return nil
@@ -68,12 +68,12 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 	if err != nil {
 		if err, ok := err.(*url.Error); ok && err.Timeout() {
 			b.printVerbosityMessage(fmt.Sprintf("Timed out request for %s: %v\n", reqUrl, err))
-			b.Renderer.AddTimedoutResponse(reqUrl)
+			b.Report.AddTimedoutResponse(reqUrl)
 			return
 		}
 
 		b.printVerbosityMessage(fmt.Sprintf("Error for %s: %v\n", reqUrl, err))
-		b.Renderer.AddFailedResponse(reqUrl)
+		b.Report.AddFailedResponse(reqUrl)
 		return
 	}
 
@@ -86,9 +86,9 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 		contentLength = len(body)
 	}
 
-	b.Renderer.AddResponseTime(reqUrl, responseTime)
-	b.Renderer.AddReceivedDataLength(reqUrl, int64(contentLength))
-	b.Renderer.AddResponseStatusCode(reqUrl, resp.StatusCode, b.isFailed(resp.StatusCode))
+	b.Report.AddResponseTime(reqUrl, responseTime)
+	b.Report.AddReceivedDataLength(reqUrl, int64(contentLength))
+	b.Report.AddResponseStatusCode(reqUrl, resp.StatusCode, b.isFailed(resp.StatusCode))
 	b.printVerbosityMessage(fmt.Sprintf("Recieved response for sent requests to %s in %v. Status: %s\n", reqUrl, responseTime, http.StatusText(resp.StatusCode)))
 }
 

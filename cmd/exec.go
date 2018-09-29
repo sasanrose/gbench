@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/sasanrose/gbench/bench"
-	"github.com/sasanrose/gbench/result"
+	"github.com/sasanrose/gbench/report"
 	"github.com/spf13/cobra"
 )
 
@@ -34,15 +35,29 @@ gbench exec -url 'GET|www.google.com' -url 'GET|www.google.com/path2' -r 100 -c 
 			os.Exit(2)
 		}
 
-		renderer := result.NewStdoutRenderer()
-		renderer.Init(concurrent)
+		if _, err := os.Stat(outputPath); err == nil && !forceOverWrite {
+			fmt.Fprintf(os.Stderr, "%s already exists. Use -F to overwrite.\n", outputPath)
+			os.Exit(2)
+		}
+
+		outputFile, err := os.Create(outputPath)
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Could not open %s: %v\n", outputPath, err)
+			os.Exit(2)
+		}
+
+		defer outputFile.Close()
+
+		result := &report.Result{}
+		result.Init(concurrent)
 
 		configurations := []func(*bench.Bench){
 			bench.WithConcurrency(concurrent),
 			bench.WithRequests(requests),
 			bench.WithConnectionTimeout(connectionTimeout),
 			bench.WithResponseTimeout(responseTimeout),
-			bench.WithRenderer(renderer),
+			bench.WithReport(result),
 		}
 
 		if file != "" {
@@ -111,12 +126,13 @@ gbench exec -url 'GET|www.google.com' -url 'GET|www.google.com/path2' -r 100 -c 
 		b := bench.NewBench(configurations...)
 		b.Exec(ctx)
 
-		renderer.Render()
+		encoder := json.NewEncoder(outputFile)
+		encoder.Encode(result)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(execCmd)
 
-	initFlags()
+	initExecFlags()
 }

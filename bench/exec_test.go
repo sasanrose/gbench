@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/sasanrose/gbench/result"
+	"github.com/sasanrose/gbench/report"
 )
 
 type testHttp struct {
@@ -86,7 +86,7 @@ func TestExec(t *testing.T) {
 	ts3 := httptest.NewServer(hNotFound)
 	defer ts3.Close()
 
-	r := result.NewMockRenderer()
+	r := &report.Result{}
 	r.Init(2)
 
 	url1 := ts1.URL + "/one"
@@ -108,13 +108,11 @@ func TestExec(t *testing.T) {
 		WithVerbosity(&buf),
 		WithRawCookie("testCookie"),
 		WithHeader("Test-Key", "testVal"),
-		WithRenderer(r),
+		WithReport(r),
 	}
 
 	b := NewBench(configurations...)
 	b.Exec(context.Background())
-
-	r.Render()
 
 	if buf.Len() == 0 {
 		t.Errorf("Verbosity writer is empty")
@@ -154,7 +152,7 @@ func TestExec(t *testing.T) {
 		},
 	}
 
-	checkResult(t, r.BenchResult, expected)
+	checkResult(t, r, expected)
 
 	if hOk.totalRequests != 4 || hCreated.totalRequests != 4 || hNotFound.totalRequests != 4 {
 		t.Errorf("Wrong number of requests are sent to the servers")
@@ -228,7 +226,7 @@ func checkRequest(t *testing.T, h *testHttp, expected *testRequest) {
 	}
 }
 
-func checkResult(t *testing.T, r *result.MockedResult, expected *expectedResult) {
+func checkResult(t *testing.T, r *report.Result, expected *expectedResult) {
 	if r.TotalRequests != expected.totalRequests ||
 		r.SuccessfulRequests != expected.successfulRequests ||
 		r.FailedRequests != expected.failedRequests ||

@@ -1,9 +1,11 @@
-package result
+package render
 
 import (
 	"bytes"
 	"strings"
 	"testing"
+
+	"github.com/sasanrose/gbench/report"
 )
 
 // The strings should be in the order of appearance
@@ -83,12 +85,14 @@ func TestOutput(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 
 	r := &stdout{}
-	r.Init(2)
 	r.output = buf
 
-	addTestData(r)
+	result := &report.Result{}
+	result.Init(2)
 
-	r.Render()
+	addTestData(result)
+
+	r.Render(result)
 
 	index := 0
 	output := buf.Bytes()

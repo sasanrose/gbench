@@ -6,16 +6,17 @@ import (
 )
 
 var (
-	isVerbose                                             bool
-	urls, headers                                         []string
-	file, authUsername, authPassword, proxyUrl, rawCookie string
-	concurrent, requests                                  int
-	successStatusCodes                                    []int
-	connectionTimeout, responseTimeout                    time.Duration
+	isVerbose, forceOverWrite                                         bool
+	urls, headers                                                     []string
+	file, authUsername, authPassword, proxyUrl, rawCookie, outputPath string
+	concurrent, requests                                              int
+	successStatusCodes                                                []int
+	connectionTimeout, responseTimeout                                time.Duration
 )
 
-func initFlags() {
+func initExecFlags() {
 	execCmd.Flags().BoolVarP(&isVerbose, "verbose", "v", false, "Turn on verbosity mode.")
+	execCmd.Flags().BoolVarP(&forceOverWrite, "force", "F", false, "Force overwrite for the report file.")
 	execCmd.Flags().StringSliceVarP(&urls, "url", "u", []string{}, "Url to benchmark. This can be used multiple times.")
 	execCmd.Flags().StringVarP(&file, "file", "f", "", "Path to the file containing list of urls to benchmark.")
 	execCmd.Flags().IntVarP(&concurrent, "concurrent", "c", 1, "Number of concurrent requests.")
@@ -32,4 +33,5 @@ func initFlags() {
 	execCmd.Flags().DurationVarP(&responseTimeout, "response-timeout", "R", 0, "Response timeout (0 means no timeout).")
 	execCmd.Flags().StringSliceVarP(&headers, "header", "H", []string{}, "HTTP header in format of key=value. This can be used multiple times.")
 	execCmd.Flags().StringVar(&rawCookie, "raw-cookie", "", "A string to be sent as raw cookie (In the format of Set-Cookie HTTP header).")
+	execCmd.Flags().StringVarP(&outputPath, "output", "o", "./report.json", "The path to store the report of benchmark.")
 }
