@@ -25,6 +25,22 @@ func (r *Result) Init(concurrency int) {
 	r.lock = &sync.Mutex{}
 }
 
+// Set bench start time
+func (r *Result) SetStartTime(t time.Time) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	r.StartTime = t
+}
+
+// Set bench end time
+func (r *Result) SetEndTime(t time.Time) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	r.EndTime = t
+}
+
 // Add content length received to total amount for a specific URL.
 func (r *Result) AddReceivedDataLength(url string, contentLength int64) {
 	r.lock.Lock()

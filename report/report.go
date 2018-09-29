@@ -10,4 +10,6 @@ type Report interface {
 	AddTimedoutResponse(url string)
 	AddFailedResponse(url string)
 	Init(concurrency int)
+	SetStartTime(t time.Time)
+	SetEndTime(t time.Time)
 }

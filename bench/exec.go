@@ -20,6 +20,14 @@ func (b *Bench) Exec(ctx context.Context) error {
 	remainingRequests := b.Requests
 	t := time.Now()
 
+	b.Report.SetStartTime(t)
+
+	defer func() {
+		te := time.Now()
+		b.Report.SetTotalDuration(te.Sub(t))
+		b.Report.SetEndTime(te)
+	}()
+
 	for remainingRequests > 0 {
 		waitChannel := make(chan struct{})
 		doneReqs := b.Requests - remainingRequests
@@ -32,10 +40,6 @@ func (b *Bench) Exec(ctx context.Context) error {
 			continue
 		}
 	}
-
-	defer func() {
-		b.Report.SetTotalDuration(time.Since(t))
-	}()
 
 	return nil
 }

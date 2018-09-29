@@ -12,6 +12,23 @@ func getTestResultStruct() *Result {
 	return r
 }
 
+func TestTimes(t *testing.T) {
+	r := getTestResultStruct()
+
+	s := time.Now()
+
+	r.SetStartTime(s)
+	r.SetEndTime(s.Add(10 * time.Second))
+
+	if r.StartTime != s {
+		t.Error("Enexpected start time")
+	}
+
+	if r.EndTime.Sub(s) != 10*time.Second {
+		t.Error("Enexpected end time")
+	}
+}
+
 func TestContentLength(t *testing.T) {
 	r := getTestResultStruct()
 

@@ -24,6 +24,8 @@ func (g *tableGenerator) getBenchResultTable() *termtables.Table {
 	transferredData := float64(g.r.TotalReceivedDataLength) / math.Pow(2, 20)
 
 	table.AddTitle(g.getColoredString("Final benchmark result", chalk.Blue))
+	g.addColoredRow(table, chalk.Cyan, "Start time", g.r.StartTime.Format(time.RFC1123))
+	g.addColoredRow(table, chalk.Cyan, "End time", g.r.EndTime.Format(time.RFC1123))
 	g.addColoredRow(table, chalk.Cyan, "Total requests sent", g.r.TotalRequests)
 	g.addColoredRow(table, chalk.Cyan, "Total data received", fmt.Sprintf("%.5f MB", transferredData))
 	g.addColoredRow(table, chalk.Green, "Total successful requests", g.r.SuccessfulRequests)

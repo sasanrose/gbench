@@ -19,6 +19,8 @@ type Result struct {
 	FailedRequests           int                    `json:"failed-requests"`
 	TimedOutRequests         int                    `json:"timedout-requests"`
 
+	StartTime               time.Time                `json:"start-time"`
+	EndTime                 time.Time                `json:"end-time"`
 	TotalTime               time.Duration            `json:"total-time"`
 	TotalResponseTime       time.Duration            `json:"total-response-time"`
 	ResponseTimesTotalCount int                      `json:"response-times-total-count"`

@@ -10,6 +10,8 @@ import (
 
 // The strings should be in the order of appearance
 var expectedStringsInOutput []string = []string{
+	"Start time",
+	"End time",
 	"Final benchmark result",
 	"Total requests sent",
 	"Total data received",
