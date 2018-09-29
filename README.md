@@ -69,6 +69,7 @@ Flags:
   -v, --verbose                       Turn on verbosity mode.
 ```
 ```bash
+$ gbench render -h
 Sample usage:                                                                                                                                                                                
 gbench render (Will use all the default values)
 gbench render -i ./path/to/report.json
