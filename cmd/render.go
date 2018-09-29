@@ -32,6 +32,15 @@ gbench render -i ./path/to/report.json --driver html -a 0.0.0.0 -p 7777`,
 			renderCli(file)
 			return
 		}
+
+		if driver == "html" {
+			renderHtml(file, cmd)
+			return
+		}
+
+		fmt.Fprintf(os.Stderr, "Invalid dirver: %s. Only cli and html are supported.\n", driver)
+		cmd.Usage()
+		os.Exit(2)
 	},
 }
 
@@ -46,6 +55,11 @@ func renderCli(file *os.File) {
 
 	r := render.NewStdoutRenderer()
 	r.Render(result)
+}
+
+func renderHtml(file *os.File, cmd *cobra.Command) {
+	fmt.Fprintf(os.Stderr, "Html driver is an upcoming feature. Sorry for the inconvenience.\nPlease use cli driver for now.\n")
+	os.Exit(2)
 }
 
 func init() {
