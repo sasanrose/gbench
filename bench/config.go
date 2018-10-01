@@ -13,30 +13,31 @@ import (
 	"github.com/sasanrose/gbench/report"
 )
 
-const URL_ERROR_MESSAGE = "%s\nWrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com"
-
-// Create a config to set number of concurrent requests per URL.
+// WithConcurrency creates a config to set number of concurrent
+// requests per URL.
 func WithConcurrency(n int) func(*Bench) {
 	return func(b *Bench) {
 		b.Concurrency = n
 	}
 }
 
-// Create a config to set total number of requests to send per URL.
+// WithRequests creates a config to set total number of requests
+// to send per URL.
 func WithRequests(n int) func(*Bench) {
 	return func(b *Bench) {
 		b.Requests = n
 	}
 }
 
-// Add an endpoint to benchmark.
+// WithURL adds an endpoint to benchmark.
 func WithURL(u *URL) func(*Bench) {
 	return func(b *Bench) {
 		b.URLs = append(b.URLs, u)
 	}
 }
 
-// Defines what should be considered as a success status code.
+// WithSuccessStatusCode defines what should be considered as a success
+// status code.
 // Default values are: 200, 201, 202
 func WithSuccessStatusCode(code int) func(*Bench) {
 	return func(b *Bench) {
@@ -44,28 +45,30 @@ func WithSuccessStatusCode(code int) func(*Bench) {
 	}
 }
 
-// Add basic HTTP authentication. Note: This will be used for all the provided urls.
+// WithAuth adds basic HTTP authentication.
+// Note: This will be used for all the provided urls.
 func WithAuth(username, password string) func(*Bench) {
 	return func(b *Bench) {
 		b.Auth = &Auth{username, password}
 	}
 }
 
-// Add an endpoint to benchmark.
+// WithVerbosity adds an endpoint to benchmark.
 func WithVerbosity(w io.Writer) func(*Bench) {
 	return func(b *Bench) {
 		b.VerbosityWriter = w
 	}
 }
 
-// Proxy server address. Note: This will be used for all the provided urls.
+// WithProxy defines a proxy server address to use.
+// Note: This will be used for all the provided urls.
 func WithProxy(addr string) func(*Bench) {
 	return func(b *Bench) {
 		b.Proxy = addr
 	}
 }
 
-// Set a benchmarking endpoint using a string.
+// WithURLString sets a benchmarking endpoint using a string.
 // Supported formats are:
 //
 // GET|http://www.google.com?search=test
@@ -84,35 +87,37 @@ func WithURLString(u string) (func(*Bench), error) {
 	return f, nil
 }
 
-// Set connection timeout.
+// WithConnectionTimeout sets connection timeout.
 func WithConnectionTimeout(t time.Duration) func(*Bench) {
 	return func(b *Bench) {
 		b.ConnectionTimeout = t
 	}
 }
 
-// Set response timeout.
+// WithResponseTimeout sets response timeout.
 func WithResponseTimeout(t time.Duration) func(*Bench) {
 	return func(b *Bench) {
 		b.ResponseTimeout = t
 	}
 }
 
-// Set a raw cookie string. Note: This will be used for all the provided urls.
+// WithRawCookie sets a raw cookie string.
+// Note: This will be used for all the provided urls.
 func WithRawCookie(cookie string) func(*Bench) {
 	return func(b *Bench) {
 		b.RawCookie = cookie
 	}
 }
 
-// Set http headers. Note: This will be used for all the provided urls.
+// WithHeader sets http headers.
+// Note: This will be used for all the provided urls.
 func WithHeader(key, value string) func(*Bench) {
 	return func(b *Bench) {
 		b.Headers[key] = value
 	}
 }
 
-// Set http headers using a string in key=value format.
+// WithHeaderString sets http headers using a string in key=value format.
 // Note: This will be used for all the provided urls.
 func WithHeaderString(header string) (func(*Bench), error) {
 	keyValue := strings.Split(header, "=")
@@ -124,8 +129,8 @@ func WithHeaderString(header string) (func(*Bench), error) {
 	return WithHeader(keyValue[0], keyValue[1]), nil
 }
 
-// Set endpoints from a file. The file is expected to have a string as defined
-// in WithURLString in each line.
+// WithFile sets endpoints using a file. The file is expected to have a
+// string as defined in WithURLString in each line.
 func WithFile(path string) (func(*Bench), error) {
 	file, err := fs.Open(path)
 
@@ -159,7 +164,7 @@ func WithFile(path string) (func(*Bench), error) {
 	}, nil
 }
 
-// Sets a result report
+// WithReport sets a result report
 func WithReport(report report.Report) func(*Bench) {
 	return func(b *Bench) {
 		b.Report = report
@@ -171,7 +176,7 @@ func parseURL(u string) (*URL, error) {
 	parts := strings.Split(u, "|")
 
 	if len(parts) != 2 && len(parts) != 3 {
-		return nil, fmt.Errorf(URL_ERROR_MESSAGE, u)
+		return nil, fmt.Errorf("%s\nWrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com", u)
 	}
 
 	method := strings.ToUpper(parts[0])

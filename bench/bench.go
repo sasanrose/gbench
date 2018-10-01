@@ -1,3 +1,4 @@
+// Package bench executes a benchmark based on the given configurations.
 package bench
 
 import (
@@ -9,7 +10,7 @@ import (
 	"github.com/sasanrose/gbench/report"
 )
 
-// A bnech represents a new benchmark that we want to execute.
+// Bench represents a new benchmark that we want to execute.
 type Bench struct {
 	// Number of concurrent requests as well as total number of requests to
 	// send.
@@ -36,7 +37,7 @@ type Bench struct {
 	Report report.Report
 }
 
-// A url represents an endpoint that we want to benchmark.
+// URL represents an endpoint that we want to benchmark.
 type URL struct {
 	// Address and method to use for the endpoint.
 	Addr, Method string
@@ -44,13 +45,13 @@ type URL struct {
 	Data map[string]string
 }
 
-// An auth is used for a basic HTTP authentication.
+// Auth is used for a basic HTTP authentication.
 type Auth struct {
 	// Username and password to use with basic HTTP authentication.
 	Username, Password string
 }
 
-// This function creates a new benchmark given a list of configurations. A
+// NewBench creates a new benchmark given a list of configurations. A
 // config can be created on the fly or using the predefined functions.
 func NewBench(configurations ...func(*Bench)) *Bench {
 	b := &Bench{

@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// Executes a benchmark. The context is used to cancel the benchmark at any
+// Exec executes a benchmark. The context is used to cancel the benchmark at any
 // given time.
 func (b *Bench) Exec(ctx context.Context) error {
 	client := b.getClient()
