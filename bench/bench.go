@@ -30,7 +30,7 @@ type Bench struct {
 	VerbosityWriterLock *sync.Mutex
 	// Connection and response timeouts
 	ResponseTimeout, ConnectionTimeout time.Duration
-	// Http raw cookie string (i.e. the result of document.cookie).
+	// HTTP raw cookie string (i.e. the result of document.cookie).
 	RawCookie string
 	// Report to use
 	Report report.Report

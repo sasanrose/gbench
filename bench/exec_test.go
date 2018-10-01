@@ -11,7 +11,7 @@ import (
 	"github.com/sasanrose/gbench/report"
 )
 
-type testHttp struct {
+type testHTTP struct {
 	lock                      *sync.Mutex
 	requests                  []*testRequest
 	totalRequests, statusCode int
@@ -36,15 +36,15 @@ type expectedConcurrencyResult struct {
 	totalRequests, successfulRequests, failedRequests, timedOutRequests int
 }
 
-func newTestHttp(statusCode int) *testHttp {
-	return &testHttp{
+func newTestHTTP(statusCode int) *testHTTP {
+	return &testHTTP{
 		lock:       &sync.Mutex{},
 		requests:   make([]*testRequest, 0),
 		statusCode: statusCode,
 	}
 }
 
-func (h *testHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *testHTTP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
@@ -74,15 +74,15 @@ func (h *testHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestExec(t *testing.T) {
-	hOk := newTestHttp(http.StatusOK)
+	hOk := newTestHTTP(http.StatusOK)
 	ts1 := httptest.NewServer(hOk)
 	defer ts1.Close()
 
-	hCreated := newTestHttp(http.StatusCreated)
+	hCreated := newTestHTTP(http.StatusCreated)
 	ts2 := httptest.NewServer(hCreated)
 	defer ts2.Close()
 
-	hNotFound := newTestHttp(http.StatusNotFound)
+	hNotFound := newTestHTTP(http.StatusNotFound)
 	ts3 := httptest.NewServer(hNotFound)
 	defer ts3.Close()
 
@@ -195,7 +195,7 @@ func TestExec(t *testing.T) {
 	checkRequest(t, hNotFound, expectedRequest)
 }
 
-func checkRequest(t *testing.T, h *testHttp, expected *testRequest) {
+func checkRequest(t *testing.T, h *testHTTP, expected *testRequest) {
 	for _, request := range h.requests {
 		if request.cookie != expected.cookie {
 			t.Errorf("Expected %s as cookie but got %s", expected.cookie, request.cookie)
