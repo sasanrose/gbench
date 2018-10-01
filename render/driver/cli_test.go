@@ -1,10 +1,11 @@
-package render
+package driver
 
 import (
 	"bytes"
 	"strings"
 	"testing"
 
+	"github.com/sasanrose/gbench/render"
 	"github.com/sasanrose/gbench/report"
 )
 
@@ -76,9 +77,9 @@ var expectedStringsInOutput []string = []string{
 }
 
 func TestNew(t *testing.T) {
-	r := NewStdoutRenderer()
+	r := NewCli()
 
-	if _, ok := r.(Renderer); !ok {
+	if _, ok := r.(render.Renderer); !ok {
 		t.Error("Expected to get a var of Renderer interface type")
 	}
 }
@@ -86,7 +87,7 @@ func TestNew(t *testing.T) {
 func TestOutput(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 
-	r := &stdout{}
+	r := &cli{}
 	r.output = buf
 
 	result := &report.Result{}
