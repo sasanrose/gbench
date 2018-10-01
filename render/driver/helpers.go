@@ -43,10 +43,10 @@ func (g *tableGenerator) getBenchResultTable() *termtables.Table {
 	return table
 }
 
-func (g *tableGenerator) getUrlTables() []*termtables.Table {
+func (g *tableGenerator) getURLTables() []*termtables.Table {
 	urlTables := make([]*termtables.Table, 0)
 
-	for url := range g.r.Urls {
+	for url := range g.r.URLs {
 		urlTable := termtables.CreateTable()
 		urlTable.AddTitle(g.getColoredString(fmt.Sprintf("Final result for %s", url), chalk.Blue))
 
@@ -90,7 +90,7 @@ func (g *tableGenerator) getConcurrencyTables() map[int]*termtables.Table {
 			if _, ok := concurrencyTables[index]; !ok {
 				concurrencyTables[index] = termtables.CreateTable()
 				concurrencyTables[index].AddTitle(g.getColoredString(fmt.Sprintf("Result for concurrent requests batch %d", index+1), chalk.Blue))
-				concurrencyTables[index].AddHeaders(g.getColoredString("Url", chalk.Cyan))
+				concurrencyTables[index].AddHeaders(g.getColoredString("URL", chalk.Cyan))
 				concurrencyTables[index].AddHeaders(g.getColoredString("Total", chalk.Cyan))
 				concurrencyTables[index].AddHeaders(g.getColoredString("Success", chalk.Green))
 				concurrencyTables[index].AddHeaders(g.getColoredString("Failed", chalk.Red))

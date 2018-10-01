@@ -15,7 +15,7 @@ type Bench struct {
 	// send.
 	Concurrency, Requests int
 	// Benchmarking endpoints.
-	Urls []*Url
+	URLs []*URL
 	// Optional basic HTTP authentication.
 	Auth *Auth
 	// Optional proxy address to use (Does not support authentication).
@@ -37,7 +37,7 @@ type Bench struct {
 }
 
 // A url represents an endpoint that we want to benchmark.
-type Url struct {
+type URL struct {
 	// Address and method to use for the endpoint.
 	Addr, Method string
 	// Optional data to send in the format of key-value.
@@ -55,7 +55,7 @@ type Auth struct {
 func NewBench(configurations ...func(*Bench)) *Bench {
 	b := &Bench{
 		Headers:            make(map[string]string),
-		Urls:               make([]*Url, 0),
+		URLs:               make([]*URL, 0),
 		SuccessStatusCodes: make([]int, 0),
 	}
 

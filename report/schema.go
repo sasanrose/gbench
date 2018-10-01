@@ -9,7 +9,7 @@ import (
 // information for a specific benchmark. This struct is used to encode the
 // result to json and vice versa.
 type Result struct {
-	Urls map[string]bool `json:"urls"`
+	URLs map[string]bool `json:"urls"`
 
 	TotalReceivedDataLength  int64                  `json:"total-received-data-length"`
 	ReceivedDataLength       map[string]int64       `json:"received-data-length"`

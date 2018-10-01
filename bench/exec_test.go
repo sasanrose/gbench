@@ -93,18 +93,18 @@ func TestExec(t *testing.T) {
 	url2 := ts2.URL + "/two"
 	url3 := ts3.URL + "/three"
 
-	withUrl1, _ := WithURLString("GET|" + url1)
-	withUrl2, _ := WithURLString("POST|" + url2 + "|foo=bar&foo2=bar2")
-	withUrl3, _ := WithURLString("HEAD|" + url3)
+	withURL1, _ := WithURLString("GET|" + url1)
+	withURL2, _ := WithURLString("POST|" + url2 + "|foo=bar&foo2=bar2")
+	withURL3, _ := WithURLString("HEAD|" + url3)
 
 	var buf bytes.Buffer
 
 	configurations := []func(*Bench){
 		WithConcurrency(2),
 		WithRequests(4),
-		withUrl1,
-		withUrl2,
-		withUrl3,
+		withURL1,
+		withURL2,
+		withURL3,
 		WithVerbosity(&buf),
 		WithRawCookie("testCookie"),
 		WithHeader("Test-Key", "testVal"),

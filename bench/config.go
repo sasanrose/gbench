@@ -15,14 +15,14 @@ import (
 
 const URL_ERROR_MESSAGE = "%s\nWrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com"
 
-// Create a config to set number of concurrent requests per Url.
+// Create a config to set number of concurrent requests per URL.
 func WithConcurrency(n int) func(*Bench) {
 	return func(b *Bench) {
 		b.Concurrency = n
 	}
 }
 
-// Create a config to set total number of requests to send per Url.
+// Create a config to set total number of requests to send per URL.
 func WithRequests(n int) func(*Bench) {
 	return func(b *Bench) {
 		b.Requests = n
@@ -30,9 +30,9 @@ func WithRequests(n int) func(*Bench) {
 }
 
 // Add an endpoint to benchmark.
-func WithURL(u *Url) func(*Bench) {
+func WithURL(u *URL) func(*Bench) {
 	return func(b *Bench) {
-		b.Urls = append(b.Urls, u)
+		b.URLs = append(b.URLs, u)
 	}
 }
 
@@ -73,13 +73,13 @@ func WithProxy(addr string) func(*Bench) {
 // POST|https://www.google.com?query=string|search=test&foo=bar
 // HEAD|https://www.google.com
 func WithURLString(u string) (func(*Bench), error) {
-	parsedUrl, err := parseUrl(u)
+	parsedURL, err := parseURL(u)
 
 	if err != nil {
 		return nil, err
 	}
 
-	f := WithURL(parsedUrl)
+	f := WithURL(parsedURL)
 
 	return f, nil
 }
@@ -138,16 +138,16 @@ func WithFile(path string) (func(*Bench), error) {
 	s := bufio.NewScanner(file)
 	s.Split(bufio.ScanLines)
 
-	urls := make([]*Url, 0)
+	urls := make([]*URL, 0)
 
 	for s.Scan() {
-		parsedUrl, err := parseUrl(s.Text())
+		parsedURL, err := parseURL(s.Text())
 
 		if err != nil {
 			return nil, err
 		}
 
-		urls = append(urls, parsedUrl)
+		urls = append(urls, parsedURL)
 	}
 
 	if len(urls) == 0 {
@@ -155,7 +155,7 @@ func WithFile(path string) (func(*Bench), error) {
 	}
 
 	return func(b *Bench) {
-		b.Urls = append(b.Urls, urls...)
+		b.URLs = append(b.URLs, urls...)
 	}, nil
 }
 
@@ -166,7 +166,7 @@ func WithReport(report report.Report) func(*Bench) {
 	}
 }
 
-func parseUrl(u string) (*Url, error) {
+func parseURL(u string) (*URL, error) {
 	u = strings.Trim(u, "\" ")
 	parts := strings.Split(u, "|")
 
@@ -181,7 +181,7 @@ func parseUrl(u string) (*Url, error) {
 		return nil, fmt.Errorf("Invalid URL provided: %v", err)
 	}
 
-	if err := validateUrl(urlStruct, method, len(parts)); err != nil {
+	if err := validateURL(urlStruct, method, len(parts)); err != nil {
 		return nil, fmt.Errorf("Error for '%s': %v", u, err)
 	}
 
@@ -202,14 +202,14 @@ func parseUrl(u string) (*Url, error) {
 		}
 	}
 
-	return &Url{
+	return &URL{
 		Addr:   urlStruct.String(),
 		Method: method,
 		Data:   data,
 	}, nil
 }
 
-func validateUrl(urlStruct *url.URL, method string, lenParts int) error {
+func validateURL(urlStruct *url.URL, method string, lenParts int) error {
 	if method != http.MethodGet && method != http.MethodPost && method != http.MethodHead {
 		return errors.New("Method not allowed")
 	}

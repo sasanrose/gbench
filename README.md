@@ -65,7 +65,7 @@ Flags:
   -r, --requests int                  Number of requests to send. (default 1)
   -R, --response-timeout duration     Response timeout (0 means no timeout).
   -s, --status-codes ints             Define what should be considered as a successful status code. (default [200,202,201])
-  -u, --url strings                   Url to benchmark. This can be used multiple times.
+  -u, --url strings                   URL to benchmark. This can be used multiple times.
   -v, --verbose                       Turn on verbosity mode.
 ```
 ```bash

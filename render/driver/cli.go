@@ -20,7 +20,7 @@ func NewCli() render.Renderer {
 func (r *cli) Render(result *report.Result) error {
 	tableGen := &tableGenerator{result}
 	table := tableGen.getBenchResultTable()
-	urlTables := tableGen.getUrlTables()
+	urlTables := tableGen.getURLTables()
 	concurrencyTables := tableGen.getConcurrencyTables()
 
 	fmt.Fprint(r.output, table.Render())

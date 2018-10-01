@@ -11,7 +11,7 @@ import (
 func TestConfigurations(t *testing.T) {
 	var buf bytes.Buffer
 
-	u := &Url{
+	u := &URL{
 		Addr: "testAddr", Method: "GET",
 	}
 
@@ -49,7 +49,7 @@ func TestConfigurations(t *testing.T) {
 	b := NewBench(configurations...)
 
 	checkBenchGeneralConfig(b, t)
-	checkBenchUrls(b, t)
+	checkBenchURLs(b, t)
 }
 
 func checkBenchGeneralConfig(b *Bench, t *testing.T) {
@@ -86,8 +86,8 @@ func checkBenchGeneralConfig(b *Bench, t *testing.T) {
 	}
 }
 
-func checkBenchUrls(b *Bench, t *testing.T) {
-	if len(b.Urls) != 1 || b.Urls[0].Addr != "testAddr" || b.Urls[0].Method != "GET" {
+func checkBenchURLs(b *Bench, t *testing.T) {
+	if len(b.URLs) != 1 || b.URLs[0].Addr != "testAddr" || b.URLs[0].Method != "GET" {
 		t.Error("URL is not set as expected")
 	}
 

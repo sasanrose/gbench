@@ -19,7 +19,7 @@ func (r *Result) Init(concurrency int) {
 	r.ShortestResponseTimes = make(map[string]time.Duration)
 	r.LongestResponseTimes = make(map[string]time.Duration)
 	r.concurrency = concurrency
-	r.Urls = make(map[string]bool)
+	r.URLs = make(map[string]bool)
 	r.ResponseTimesCount = make(map[string]int)
 
 	r.ConcurrencyResult = make(map[string][]*ConcurrencyResult)
@@ -50,7 +50,7 @@ func (r *Result) AddReceivedDataLength(url string, contentLength int64) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 
 	// Nothing to do
 	if contentLength <= 0 {
@@ -80,7 +80,7 @@ func (r *Result) AddResponseTime(url string, responseTime time.Duration) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 	r.ResponseTimesTotalCount++
 	r.TotalResponseTime += responseTime
 
@@ -133,7 +133,7 @@ func (r *Result) AddResponseStatusCode(url string, statusCode int, failed bool) 
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 
 	r.TotalRequests++
 
@@ -167,7 +167,7 @@ func (r *Result) AddTimedoutResponse(url string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 
 	r.updateConcurrencyResult(url, 0, 0, 1)
 
@@ -187,7 +187,7 @@ func (r *Result) AddFailedResponse(url string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 
 	r.updateConcurrencyResult(url, 0, 1, 0)
 

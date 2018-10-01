@@ -9,25 +9,25 @@ import (
 
 type urlTest struct {
 	testStr     string
-	expectedUrl *Url
+	expectedURL *URL
 }
 
-var expectedUrls = []urlTest{
+var expectedURLs = []urlTest{
 	{
 		"GET|http://www.google.com?search=test",
-		&Url{
+		&URL{
 			Addr: "http://www.google.com?search=test", Method: "GET",
 		},
 	},
 	{
 		"POST|https://www.google.com|search=test",
-		&Url{
+		&URL{
 			Addr: "https://www.google.com", Method: "POST", Data: map[string]string{"search": "test"},
 		},
 	},
 	{
 		"POST|https://www.google.com?query=string|search=test&foo=bar",
-		&Url{
+		&URL{
 			Addr:   "https://www.google.com?query=string",
 			Method: "POST",
 			Data: map[string]string{
@@ -38,7 +38,7 @@ var expectedUrls = []urlTest{
 	},
 	{
 		"HEAD|http://www.google.com",
-		&Url{
+		&URL{
 			Addr: "http://www.google.com", Method: "HEAD",
 		},
 	},
@@ -77,8 +77,8 @@ func TestFile(t *testing.T) {
 
 	fileContent := ""
 
-	for _, expectedUrl := range expectedUrls {
-		fileContent += expectedUrl.testStr + "\n"
+	for _, expectedURL := range expectedURLs {
+		fileContent += expectedURL.testStr + "\n"
 	}
 
 	mockedFile := &mockedFileType{bytes.NewBufferString(fileContent)}
@@ -95,7 +95,7 @@ func TestFile(t *testing.T) {
 	checkTestResult(b, t)
 }
 
-func TestFileNoUrls(t *testing.T) {
+func TestFileNoURLs(t *testing.T) {
 	oldFs := fs
 	mfs := &mockedFSType{}
 	fs = mfs
@@ -116,14 +116,14 @@ func TestFileNoUrls(t *testing.T) {
 	}
 }
 
-func TestUrlString(t *testing.T) {
+func TestURLString(t *testing.T) {
 	configurations := []func(*Bench){}
 
-	for _, expectedUrl := range expectedUrls {
-		urlConfig, err := WithURLString(expectedUrl.testStr)
+	for _, expectedURL := range expectedURLs {
+		urlConfig, err := WithURLString(expectedURL.testStr)
 
 		if err != nil {
-			t.Errorf("Unexpected error in parsing %s: %v", expectedUrl.testStr, err)
+			t.Errorf("Unexpected error in parsing %s: %v", expectedURL.testStr, err)
 		}
 
 		configurations = append(configurations, urlConfig)
@@ -135,33 +135,33 @@ func TestUrlString(t *testing.T) {
 }
 
 func checkTestResult(b *Bench, t *testing.T) {
-	if len(b.Urls) != len(expectedUrls) {
+	if len(b.URLs) != len(expectedURLs) {
 		t.Fatalf("Wrong number of urls")
 	}
 
-	for index, url := range expectedUrls {
-		addr := b.Urls[index].Addr
-		method := b.Urls[index].Method
-		data := b.Urls[index].Data
+	for index, url := range expectedURLs {
+		addr := b.URLs[index].Addr
+		method := b.URLs[index].Method
+		data := b.URLs[index].Data
 
-		if url.expectedUrl.Addr != addr {
-			t.Errorf("Expected address %s but got %s on url index %d", url.expectedUrl.Addr, addr, index)
+		if url.expectedURL.Addr != addr {
+			t.Errorf("Expected address %s but got %s on url index %d", url.expectedURL.Addr, addr, index)
 		}
 
-		if url.expectedUrl.Method != method {
-			t.Errorf("Expected method %s but got %s on url index %d", url.expectedUrl.Method, method, index)
+		if url.expectedURL.Method != method {
+			t.Errorf("Expected method %s but got %s on url index %d", url.expectedURL.Method, method, index)
 		}
 
-		if (url.expectedUrl.Data == nil || len(url.expectedUrl.Data) == 0) && len(data) > 0 {
+		if (url.expectedURL.Data == nil || len(url.expectedURL.Data) == 0) && len(data) > 0 {
 			t.Fatalf("Did not expect any data at url index %d but got %v", index, data)
 		}
 
-		if url.expectedUrl.Data != nil && len(url.expectedUrl.Data) != 0 {
-			if len(url.expectedUrl.Data) != len(data) {
+		if url.expectedURL.Data != nil && len(url.expectedURL.Data) != 0 {
+			if len(url.expectedURL.Data) != len(data) {
 				t.Fatalf("Wrong number of data at url index %d", index)
 			}
 
-			for k, expectedValue := range url.expectedUrl.Data {
+			for k, expectedValue := range url.expectedURL.Data {
 				if val, ok := data[k]; !ok || val != expectedValue {
 					t.Errorf("Expected to have %s=%s in the data", k, expectedValue)
 				}
@@ -170,7 +170,7 @@ func checkTestResult(b *Bench, t *testing.T) {
 	}
 }
 
-func TestWrongUrls(t *testing.T) {
+func TestWrongURLs(t *testing.T) {
 	failTestCases := map[string]string{
 		"wrong":                                      "Wrong URL format",
 		"part1|part2|part3|wrongpart":                "Wrong URL format",
@@ -183,13 +183,13 @@ func TestWrongUrls(t *testing.T) {
 	}
 
 	for testCase, expectedError := range failTestCases {
-		parsedUrl, err := WithURLString(testCase)
+		parsedURL, err := WithURLString(testCase)
 
 		if err == nil || !strings.Contains(err.Error(), expectedError) {
 			t.Errorf(`Expected to get an error containing "%s" for url string "%s"`, expectedError, testCase)
 		}
 
-		if parsedUrl != nil {
+		if parsedURL != nil {
 			t.Errorf("Expected to get a nil in resp for %s", testCase)
 		}
 	}
