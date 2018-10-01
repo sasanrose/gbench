@@ -13,7 +13,7 @@ type testResponse struct {
 	statusCode       int
 }
 
-var testData map[string][]*testResponse = map[string][]*testResponse{
+var testData = map[string][]*testResponse{
 	"http://testurl1.com": {
 		{contentLength: 15, responseTime: 600 * time.Microsecond, statusCode: 200},
 		{contentLength: 25, responseTime: 500 * time.Microsecond, statusCode: 200},

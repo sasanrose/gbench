@@ -10,7 +10,7 @@ import (
 )
 
 // The strings should be in the order of appearance
-var expectedStringsInOutput []string = []string{
+var expectedStringsInOutput = []string{
 	"Start time",
 	"End time",
 	"Final benchmark result",
