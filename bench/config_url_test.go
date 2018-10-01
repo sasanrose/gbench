@@ -13,19 +13,19 @@ type urlTest struct {
 }
 
 var expectedUrls = []urlTest{
-	urlTest{
+	{
 		"GET|http://www.google.com?search=test",
 		&Url{
 			Addr: "http://www.google.com?search=test", Method: "GET",
 		},
 	},
-	urlTest{
+	{
 		"POST|https://www.google.com|search=test",
 		&Url{
 			Addr: "https://www.google.com", Method: "POST", Data: map[string]string{"search": "test"},
 		},
 	},
-	urlTest{
+	{
 		"POST|https://www.google.com?query=string|search=test&foo=bar",
 		&Url{
 			Addr:   "https://www.google.com?query=string",
@@ -36,7 +36,7 @@ var expectedUrls = []urlTest{
 			},
 		},
 	},
-	urlTest{
+	{
 		"HEAD|http://www.google.com",
 		&Url{
 			Addr: "http://www.google.com", Method: "HEAD",

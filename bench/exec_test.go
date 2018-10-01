@@ -124,11 +124,11 @@ func TestExec(t *testing.T) {
 			url2: 36,
 		},
 		responseStatusCode: map[string]map[int]int{
-			url1: map[int]int{http.StatusOK: 4},
-			url2: map[int]int{http.StatusCreated: 4},
+			url1: {http.StatusOK: 4},
+			url2: {http.StatusCreated: 4},
 		},
 		failedResponseStatusCode: map[string]map[int]int{
-			url3: map[int]int{http.StatusNotFound: 4},
+			url3: {http.StatusNotFound: 4},
 		},
 		timedoutResponse:   map[string]int{},
 		failedResponse:     map[string]int{},
@@ -137,17 +137,17 @@ func TestExec(t *testing.T) {
 		failedRequests:     4,
 		timedOutRequests:   0,
 		concurrencyResult: map[string][]*expectedConcurrencyResult{
-			url1: []*expectedConcurrencyResult{
-				&expectedConcurrencyResult{2, 2, 0, 0},
-				&expectedConcurrencyResult{2, 2, 0, 0},
+			url1: {
+				{2, 2, 0, 0},
+				{2, 2, 0, 0},
 			},
-			url2: []*expectedConcurrencyResult{
-				&expectedConcurrencyResult{2, 2, 0, 0},
-				&expectedConcurrencyResult{2, 2, 0, 0},
+			url2: {
+				{2, 2, 0, 0},
+				{2, 2, 0, 0},
 			},
-			url3: []*expectedConcurrencyResult{
-				&expectedConcurrencyResult{2, 0, 2, 0},
-				&expectedConcurrencyResult{2, 0, 2, 0},
+			url3: {
+				{2, 0, 2, 0},
+				{2, 0, 2, 0},
 			},
 		},
 	}

@@ -14,26 +14,26 @@ type testResponse struct {
 }
 
 var testData map[string][]*testResponse = map[string][]*testResponse{
-	"http://testurl1.com": []*testResponse{
-		&testResponse{contentLength: 15, responseTime: 600 * time.Microsecond, statusCode: 200},
-		&testResponse{contentLength: 25, responseTime: 500 * time.Microsecond, statusCode: 200},
-		&testResponse{contentLength: 25, responseTime: 550 * time.Microsecond, statusCode: 201},
-		&testResponse{contentLength: 25, responseTime: 550 * time.Microsecond, statusCode: 500, failed: true},
-		&testResponse{contentLength: 25, responseTime: 550 * time.Microsecond, timedOut: true},
+	"http://testurl1.com": {
+		{contentLength: 15, responseTime: 600 * time.Microsecond, statusCode: 200},
+		{contentLength: 25, responseTime: 500 * time.Microsecond, statusCode: 200},
+		{contentLength: 25, responseTime: 550 * time.Microsecond, statusCode: 201},
+		{contentLength: 25, responseTime: 550 * time.Microsecond, statusCode: 500, failed: true},
+		{contentLength: 25, responseTime: 550 * time.Microsecond, timedOut: true},
 	},
-	"http://testurl2.com": []*testResponse{
-		&testResponse{contentLength: 35, responseTime: 550 * time.Microsecond, statusCode: 500, failed: true},
-		&testResponse{contentLength: 15, responseTime: 600 * time.Microsecond, statusCode: 200},
-		&testResponse{contentLength: 25, responseTime: 500 * time.Microsecond, statusCode: 200},
-		&testResponse{contentLength: 25, responseTime: 550 * time.Microsecond, timedOut: true},
-		&testResponse{contentLength: 25, responseTime: 550 * time.Microsecond, statusCode: 201},
+	"http://testurl2.com": {
+		{contentLength: 35, responseTime: 550 * time.Microsecond, statusCode: 500, failed: true},
+		{contentLength: 15, responseTime: 600 * time.Microsecond, statusCode: 200},
+		{contentLength: 25, responseTime: 500 * time.Microsecond, statusCode: 200},
+		{contentLength: 25, responseTime: 550 * time.Microsecond, timedOut: true},
+		{contentLength: 25, responseTime: 550 * time.Microsecond, statusCode: 201},
 	},
-	"http://testurl3.com": []*testResponse{
-		&testResponse{contentLength: 10, responseTime: 550 * time.Microsecond, statusCode: 500, failed: true},
-		&testResponse{contentLength: 10, responseTime: 550 * time.Microsecond, failed: true},
-		&testResponse{contentLength: 25, responseTime: 500 * time.Microsecond, statusCode: 404, failed: true},
-		&testResponse{contentLength: 20, responseTime: 550 * time.Microsecond, timedOut: true},
-		&testResponse{contentLength: 20, responseTime: 550 * time.Microsecond, timedOut: true},
+	"http://testurl3.com": {
+		{contentLength: 10, responseTime: 550 * time.Microsecond, statusCode: 500, failed: true},
+		{contentLength: 10, responseTime: 550 * time.Microsecond, failed: true},
+		{contentLength: 25, responseTime: 500 * time.Microsecond, statusCode: 404, failed: true},
+		{contentLength: 20, responseTime: 550 * time.Microsecond, timedOut: true},
+		{contentLength: 20, responseTime: 550 * time.Microsecond, timedOut: true},
 	},
 }
 

@@ -46,7 +46,7 @@ func (g *tableGenerator) getBenchResultTable() *termtables.Table {
 func (g *tableGenerator) getUrlTables() []*termtables.Table {
 	urlTables := make([]*termtables.Table, 0)
 
-	for url, _ := range g.r.Urls {
+	for url := range g.r.Urls {
 		urlTable := termtables.CreateTable()
 		urlTable.AddTitle(g.getColoredString(fmt.Sprintf("Final result for %s", url), chalk.Blue))
 
