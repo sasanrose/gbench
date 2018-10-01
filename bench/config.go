@@ -2,6 +2,7 @@ package bench
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -174,21 +175,14 @@ func parseUrl(u string) (*Url, error) {
 	}
 
 	method := strings.ToUpper(parts[0])
-	if method != http.MethodGet && method != http.MethodPost && method != http.MethodHead {
-		return nil, fmt.Errorf("Not an allowed method provided for: %s", u)
-	}
 
 	urlStruct, err := url.Parse(parts[1])
 	if err != nil {
 		return nil, fmt.Errorf("Invalid URL provided: %v", err)
 	}
 
-	if urlStruct.Scheme != "http" && urlStruct.Scheme != "https" {
-		return nil, fmt.Errorf("Only http and https schemes are supported for now: %s", u)
-	}
-
-	if (method == http.MethodGet || method == http.MethodHead) && len(parts) > 2 {
-		return nil, fmt.Errorf("GET and HEAD do not need any data")
+	if err := validateUrl(urlStruct, method, len(parts)); err != nil {
+		return nil, fmt.Errorf("Error for '%s': %v", u, err)
 	}
 
 	data := make(map[string]string)
@@ -213,4 +207,20 @@ func parseUrl(u string) (*Url, error) {
 		Method: method,
 		Data:   data,
 	}, nil
+}
+
+func validateUrl(urlStruct *url.URL, method string, lenParts int) error {
+	if method != http.MethodGet && method != http.MethodPost && method != http.MethodHead {
+		return errors.New("Method not allowed")
+	}
+
+	if urlStruct.Scheme != "http" && urlStruct.Scheme != "https" {
+		return errors.New("Only http and https schemes are supported")
+	}
+
+	if (method == http.MethodGet || method == http.MethodHead) && lenParts > 2 {
+		return errors.New("GET and HEAD do not need any data")
+	}
+
+	return nil
 }

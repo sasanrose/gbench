@@ -174,7 +174,7 @@ func TestWrongUrls(t *testing.T) {
 	failTestCases := map[string]string{
 		"wrong":                                      "Wrong URL format",
 		"part1|part2|part3|wrongpart":                "Wrong URL format",
-		"wrongmethod|part2|part3":                    "Not an allowed method provided",
+		"wrongmethod|part2|part3":                    "Method not allowed",
 		"GET|ftp://www.google.com":                   "Only http and https schemes are supported",
 		"GET|https://www.google.com|part3":           "GET and HEAD do not need any data",
 		"POST|https://www.google.com":                "You need to provide post data",

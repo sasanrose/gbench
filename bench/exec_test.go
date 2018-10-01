@@ -153,6 +153,7 @@ func TestExec(t *testing.T) {
 	}
 
 	checkResult(t, r, expected)
+	checkConcurrencyResult(t, r, expected)
 
 	if hOk.totalRequests != 4 || hCreated.totalRequests != 4 || hNotFound.totalRequests != 4 {
 		t.Errorf("Wrong number of requests are sent to the servers")
@@ -246,7 +247,9 @@ func checkResult(t *testing.T, r *report.Result, expected *expectedResult) {
 
 	checkStatusCodes(t, r.ResponseStatusCode, expected.responseStatusCode, "responseStatusCode")
 	checkStatusCodes(t, r.FailedResponseStatusCode, expected.failedResponseStatusCode, "failedResponseStatusCode")
+}
 
+func checkConcurrencyResult(t *testing.T, r *report.Result, expected *expectedResult) {
 	for url, expectedConcurrencyResults := range expected.concurrencyResult {
 		if _, ok := r.ConcurrencyResult[url]; !ok {
 			t.Errorf("Expected to get a concurrencyResult for %s but got nothing", url)
