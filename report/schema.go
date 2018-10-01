@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// Result struct implements Report interface and stores all the result
+// information for a specific benchmark. This struct is used to encode the
+// result to json and vice versa.
 type Result struct {
 	Urls map[string]bool `json:"urls"`
 
@@ -38,6 +41,8 @@ type Result struct {
 	lock *sync.Mutex
 }
 
+// ConcurrencyResult struct store the result for each batch of concurrent
+// requests.
 type ConcurrencyResult struct {
 	TotalRequests      int `json:"total-request"`
 	SuccessfulRequests int `json:"successful-requests"`
