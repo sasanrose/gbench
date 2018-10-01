@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+// Init initializes a result to be used to store the benchmark result. Method
+// only accepts an integer to set as the number of concurrent requests which
+// are supposed to be sent.
 func (r *Result) Init(concurrency int) {
 	r.ResponseTime = make(map[string]time.Duration)
 	r.ReceivedDataLength = make(map[string]int64)
@@ -16,7 +19,7 @@ func (r *Result) Init(concurrency int) {
 	r.ShortestResponseTimes = make(map[string]time.Duration)
 	r.LongestResponseTimes = make(map[string]time.Duration)
 	r.concurrency = concurrency
-	r.Urls = make(map[string]bool)
+	r.URLs = make(map[string]bool)
 	r.ResponseTimesCount = make(map[string]int)
 
 	r.ConcurrencyResult = make(map[string][]*ConcurrencyResult)
@@ -25,7 +28,7 @@ func (r *Result) Init(concurrency int) {
 	r.lock = &sync.Mutex{}
 }
 
-// Set bench start time
+// SetStartTime sets benchmark's start time.
 func (r *Result) SetStartTime(t time.Time) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
@@ -33,7 +36,7 @@ func (r *Result) SetStartTime(t time.Time) {
 	r.StartTime = t
 }
 
-// Set bench end time
+// SetEndTime sets benchmark's end time.
 func (r *Result) SetEndTime(t time.Time) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
@@ -41,12 +44,13 @@ func (r *Result) SetEndTime(t time.Time) {
 	r.EndTime = t
 }
 
-// Add content length received to total amount for a specific URL.
+// AddReceivedDataLength adds content length received to the Total
+// amount for a specific URL.
 func (r *Result) AddReceivedDataLength(url string, contentLength int64) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 
 	// Nothing to do
 	if contentLength <= 0 {
@@ -63,7 +67,7 @@ func (r *Result) AddReceivedDataLength(url string, contentLength int64) {
 	r.ReceivedDataLength[url] = contentLength
 }
 
-// Set the total time elapsed since the begining of the bench marck.
+// SetTotalDuration sets the total time elapsed since the beginning of the bench marck.
 func (r *Result) SetTotalDuration(duration time.Duration) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
@@ -71,12 +75,12 @@ func (r *Result) SetTotalDuration(duration time.Duration) {
 	r.TotalTime = duration
 }
 
-// Add response time duration to total amount for a specific URL.
+// AddResponseTime add response time duration to total amount for a specific URL.
 func (r *Result) AddResponseTime(url string, responseTime time.Duration) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 	r.ResponseTimesTotalCount++
 	r.TotalResponseTime += responseTime
 
@@ -88,8 +92,8 @@ func (r *Result) AddResponseTime(url string, responseTime time.Duration) {
 		r.LongestResponseTime = responseTime
 	}
 
-	r.updateUrlShortestTime(url, responseTime)
-	r.updateUrlLongestTime(url, responseTime)
+	r.updateURLShortestTime(url, responseTime)
+	r.updateURLLongestTime(url, responseTime)
 
 	if _, ok := r.ResponseTime[url]; ok {
 		r.ResponseTime[url] += responseTime
@@ -101,7 +105,7 @@ func (r *Result) AddResponseTime(url string, responseTime time.Duration) {
 	r.ResponseTime[url] = responseTime
 }
 
-func (r *Result) updateUrlShortestTime(url string, time time.Duration) {
+func (r *Result) updateURLShortestTime(url string, time time.Duration) {
 	if _, ok := r.ShortestResponseTimes[url]; !ok {
 		r.ShortestResponseTimes[url] = time
 		return
@@ -112,7 +116,7 @@ func (r *Result) updateUrlShortestTime(url string, time time.Duration) {
 	}
 }
 
-func (r *Result) updateUrlLongestTime(url string, time time.Duration) {
+func (r *Result) updateURLLongestTime(url string, time time.Duration) {
 	if _, ok := r.LongestResponseTimes[url]; !ok {
 		r.LongestResponseTimes[url] = time
 		return
@@ -123,13 +127,13 @@ func (r *Result) updateUrlLongestTime(url string, time time.Duration) {
 	}
 }
 
-// Increament the number of responses with a specific status code for a
-// specific url.
+// AddResponseStatusCode increaments the number of responses with a specific
+// status code for a specific url.
 func (r *Result) AddResponseStatusCode(url string, statusCode int, failed bool) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 
 	r.TotalRequests++
 
@@ -158,12 +162,12 @@ func updateStatusCode(statusCodeMap *map[string]map[int]int, url string, statusC
 	(*statusCodeMap)[url][statusCode] = 1
 }
 
-// Increament the number of timed out responses for a url
+// AddTimedoutResponse increaments the number of timed out responses for a url.
 func (r *Result) AddTimedoutResponse(url string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 
 	r.updateConcurrencyResult(url, 0, 0, 1)
 
@@ -178,12 +182,12 @@ func (r *Result) AddTimedoutResponse(url string) {
 	r.TimedoutResponse[url] = 1
 }
 
-// Increament the number of failed responses for a url.
+// AddFailedResponse increaments the number of failed responses for a url.
 func (r *Result) AddFailedResponse(url string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Urls[url] = true
+	r.URLs[url] = true
 
 	r.updateConcurrencyResult(url, 0, 1, 0)
 

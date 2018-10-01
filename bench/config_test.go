@@ -11,7 +11,7 @@ import (
 func TestConfigurations(t *testing.T) {
 	var buf bytes.Buffer
 
-	u := &Url{
+	u := &URL{
 		Addr: "testAddr", Method: "GET",
 	}
 
@@ -48,16 +48,17 @@ func TestConfigurations(t *testing.T) {
 
 	b := NewBench(configurations...)
 
+	checkBenchGeneralConfig(b, t)
+	checkBenchURLs(b, t)
+}
+
+func checkBenchGeneralConfig(b *Bench, t *testing.T) {
 	if b.Concurrency != 2 {
 		t.Error("Concurrency is not set as expected")
 	}
 
 	if b.Requests != 4 {
 		t.Error("Number of requests is not set as expected")
-	}
-
-	if len(b.Urls) != 1 || b.Urls[0].Addr != "testAddr" || b.Urls[0].Method != "GET" {
-		t.Error("URL is not set as expected")
 	}
 
 	if b.Auth.Username != "user" || b.Auth.Password != "pass" {
@@ -80,6 +81,16 @@ func TestConfigurations(t *testing.T) {
 		t.Error("Response timeout is not set as expected")
 	}
 
+	if b.Report == nil {
+		t.Error("Report is not set as expected")
+	}
+}
+
+func checkBenchURLs(b *Bench, t *testing.T) {
+	if len(b.URLs) != 1 || b.URLs[0].Addr != "testAddr" || b.URLs[0].Method != "GET" {
+		t.Error("URL is not set as expected")
+	}
+
 	if b.RawCookie != "testCookie" {
 		t.Error("Raw cookie is not set as expected")
 	}
@@ -90,10 +101,6 @@ func TestConfigurations(t *testing.T) {
 
 	if val, ok := b.Headers["fooKey"]; !ok || val != "barVal" {
 		t.Error("Header is not set as expected")
-	}
-
-	if b.Report == nil {
-		t.Error("Report is not set as expected")
 	}
 
 	if len(b.SuccessStatusCodes) != 2 || b.SuccessStatusCodes[0] != 100 || b.SuccessStatusCodes[1] != 101 {

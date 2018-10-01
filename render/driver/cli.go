@@ -1,25 +1,30 @@
-package render
+// Package driver contains different drivers that can be used for rending the
+// report of a benchmark.
+package driver
 
 import (
 	"fmt"
 	"io"
 	"os"
 
+	"github.com/sasanrose/gbench/render"
 	"github.com/sasanrose/gbench/report"
 )
 
-type stdout struct {
+type cli struct {
 	output io.Writer
 }
 
-func NewStdoutRenderer() Renderer {
-	return &stdout{os.Stdout}
+// NewCli creates a new cli renderer for benchmark report.
+func NewCli() render.Renderer {
+	return &cli{os.Stdout}
 }
 
-func (r *stdout) Render(result *report.Result) error {
+// Render will output the result of the report to cli.
+func (r *cli) Render(result *report.Result) error {
 	tableGen := &tableGenerator{result}
 	table := tableGen.getBenchResultTable()
-	urlTables := tableGen.getUrlTables()
+	urlTables := tableGen.getURLTables()
 	concurrencyTables := tableGen.getConcurrencyTables()
 
 	fmt.Fprint(r.output, table.Render())

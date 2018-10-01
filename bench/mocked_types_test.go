@@ -5,7 +5,7 @@ import (
 )
 
 type mockedFSType struct {
-	err  error // An arbitary error
+	err  error // An arbitrary error
 	file *mockedFileType
 }
 

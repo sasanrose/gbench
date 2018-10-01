@@ -1,3 +1,4 @@
+// Package cmd contains all the subcommands used by gbench.
 package cmd
 
 import (
@@ -17,6 +18,7 @@ For more info please refer to https://github.com/sasanrose/gbench`,
 	},
 }
 
+// Execute runs the gbench root command.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

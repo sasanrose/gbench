@@ -11,7 +11,7 @@ import (
 	"github.com/sasanrose/gbench/report"
 )
 
-type testHttp struct {
+type testHTTP struct {
 	lock                      *sync.Mutex
 	requests                  []*testRequest
 	totalRequests, statusCode int
@@ -36,15 +36,15 @@ type expectedConcurrencyResult struct {
 	totalRequests, successfulRequests, failedRequests, timedOutRequests int
 }
 
-func newTestHttp(statusCode int) *testHttp {
-	return &testHttp{
+func newTestHTTP(statusCode int) *testHTTP {
+	return &testHTTP{
 		lock:       &sync.Mutex{},
 		requests:   make([]*testRequest, 0),
 		statusCode: statusCode,
 	}
 }
 
-func (h *testHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *testHTTP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
@@ -74,15 +74,15 @@ func (h *testHttp) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestExec(t *testing.T) {
-	hOk := newTestHttp(http.StatusOK)
+	hOk := newTestHTTP(http.StatusOK)
 	ts1 := httptest.NewServer(hOk)
 	defer ts1.Close()
 
-	hCreated := newTestHttp(http.StatusCreated)
+	hCreated := newTestHTTP(http.StatusCreated)
 	ts2 := httptest.NewServer(hCreated)
 	defer ts2.Close()
 
-	hNotFound := newTestHttp(http.StatusNotFound)
+	hNotFound := newTestHTTP(http.StatusNotFound)
 	ts3 := httptest.NewServer(hNotFound)
 	defer ts3.Close()
 
@@ -93,18 +93,18 @@ func TestExec(t *testing.T) {
 	url2 := ts2.URL + "/two"
 	url3 := ts3.URL + "/three"
 
-	withUrl1, _ := WithURLString("GET|" + url1)
-	withUrl2, _ := WithURLString("POST|" + url2 + "|foo=bar&foo2=bar2")
-	withUrl3, _ := WithURLString("HEAD|" + url3)
+	withURL1, _ := WithURLString("GET|" + url1)
+	withURL2, _ := WithURLString("POST|" + url2 + "|foo=bar&foo2=bar2")
+	withURL3, _ := WithURLString("HEAD|" + url3)
 
 	var buf bytes.Buffer
 
 	configurations := []func(*Bench){
 		WithConcurrency(2),
 		WithRequests(4),
-		withUrl1,
-		withUrl2,
-		withUrl3,
+		withURL1,
+		withURL2,
+		withURL3,
 		WithVerbosity(&buf),
 		WithRawCookie("testCookie"),
 		WithHeader("Test-Key", "testVal"),
@@ -124,11 +124,11 @@ func TestExec(t *testing.T) {
 			url2: 36,
 		},
 		responseStatusCode: map[string]map[int]int{
-			url1: map[int]int{http.StatusOK: 4},
-			url2: map[int]int{http.StatusCreated: 4},
+			url1: {http.StatusOK: 4},
+			url2: {http.StatusCreated: 4},
 		},
 		failedResponseStatusCode: map[string]map[int]int{
-			url3: map[int]int{http.StatusNotFound: 4},
+			url3: {http.StatusNotFound: 4},
 		},
 		timedoutResponse:   map[string]int{},
 		failedResponse:     map[string]int{},
@@ -137,22 +137,23 @@ func TestExec(t *testing.T) {
 		failedRequests:     4,
 		timedOutRequests:   0,
 		concurrencyResult: map[string][]*expectedConcurrencyResult{
-			url1: []*expectedConcurrencyResult{
-				&expectedConcurrencyResult{2, 2, 0, 0},
-				&expectedConcurrencyResult{2, 2, 0, 0},
+			url1: {
+				{2, 2, 0, 0},
+				{2, 2, 0, 0},
 			},
-			url2: []*expectedConcurrencyResult{
-				&expectedConcurrencyResult{2, 2, 0, 0},
-				&expectedConcurrencyResult{2, 2, 0, 0},
+			url2: {
+				{2, 2, 0, 0},
+				{2, 2, 0, 0},
 			},
-			url3: []*expectedConcurrencyResult{
-				&expectedConcurrencyResult{2, 0, 2, 0},
-				&expectedConcurrencyResult{2, 0, 2, 0},
+			url3: {
+				{2, 0, 2, 0},
+				{2, 0, 2, 0},
 			},
 		},
 	}
 
 	checkResult(t, r, expected)
+	checkConcurrencyResult(t, r, expected)
 
 	if hOk.totalRequests != 4 || hCreated.totalRequests != 4 || hNotFound.totalRequests != 4 {
 		t.Errorf("Wrong number of requests are sent to the servers")
@@ -194,7 +195,7 @@ func TestExec(t *testing.T) {
 	checkRequest(t, hNotFound, expectedRequest)
 }
 
-func checkRequest(t *testing.T, h *testHttp, expected *testRequest) {
+func checkRequest(t *testing.T, h *testHTTP, expected *testRequest) {
 	for _, request := range h.requests {
 		if request.cookie != expected.cookie {
 			t.Errorf("Expected %s as cookie but got %s", expected.cookie, request.cookie)
@@ -246,7 +247,9 @@ func checkResult(t *testing.T, r *report.Result, expected *expectedResult) {
 
 	checkStatusCodes(t, r.ResponseStatusCode, expected.responseStatusCode, "responseStatusCode")
 	checkStatusCodes(t, r.FailedResponseStatusCode, expected.failedResponseStatusCode, "failedResponseStatusCode")
+}
 
+func checkConcurrencyResult(t *testing.T, r *report.Result, expected *expectedResult) {
 	for url, expectedConcurrencyResults := range expected.concurrencyResult {
 		if _, ok := r.ConcurrencyResult[url]; !ok {
 			t.Errorf("Expected to get a concurrencyResult for %s but got nothing", url)

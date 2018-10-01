@@ -1,6 +1,7 @@
 GBench
 ======
 [![Build Status](https://travis-ci.org/sasanrose/gbench.svg?branch=master)](https://travis-ci.org/sasanrose/gbench) [![Coverage Status](https://coveralls.io/repos/github/sasanrose/gbench/badge.svg?branch=master)](https://coveralls.io/github/sasanrose/gbench?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sasanrose/gbench)](https://goreportcard.com/report/github.com/sasanrose/gbench)
 
 HTTP Load Testing And Benchmarking Tool inspired by Apache Benchmark and Siege.
 
@@ -65,7 +66,7 @@ Flags:
   -r, --requests int                  Number of requests to send. (default 1)
   -R, --response-timeout duration     Response timeout (0 means no timeout).
   -s, --status-codes ints             Define what should be considered as a successful status code. (default [200,202,201])
-  -u, --url strings                   Url to benchmark. This can be used multiple times.
+  -u, --url strings                   URL to benchmark. This can be used multiple times.
   -v, --verbose                       Turn on verbosity mode.
 ```
 ```bash
