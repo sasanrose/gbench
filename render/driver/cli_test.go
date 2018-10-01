@@ -10,7 +10,7 @@ import (
 )
 
 // The strings should be in the order of appearance
-var expectedStringsInOutput []string = []string{
+var expectedStringsInOutput = []string{
 	"Start time",
 	"End time",
 	"Final benchmark result",
@@ -60,17 +60,17 @@ var expectedStringsInOutput []string = []string{
 	"Longest response time",
 	"Average response time",
 	"Result for concurrent requests batch 1",
-	"Url",
+	"URL",
 	"http://testurl1.com",
 	"http://testurl2.com",
 	"http://testurl3.com",
 	"Result for concurrent requests batch 2",
-	"Url",
+	"URL",
 	"http://testurl1.com",
 	"http://testurl2.com",
 	"http://testurl3.com",
 	"Result for concurrent requests batch 3",
-	"Url",
+	"URL",
 	"http://testurl1.com",
 	"http://testurl2.com",
 	"http://testurl3.com",

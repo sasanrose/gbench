@@ -104,8 +104,8 @@ gbench exec -url 'GET|www.google.com' -url 'GET|www.google.com/path2' -r 100 -c 
 			configurations = append(configurations, bench.WithAuth(authUsername, authPassword))
 		}
 
-		if proxyUrl != "" {
-			configurations = append(configurations, bench.WithProxy(proxyUrl))
+		if proxyURL != "" {
+			configurations = append(configurations, bench.WithProxy(proxyURL))
 		}
 
 		if rawCookie != "" {

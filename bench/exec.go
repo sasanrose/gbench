@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// Executes a benchmark. The context is used to cancel the benchmark at any
+// Exec executes a benchmark. The context is used to cancel the benchmark at any
 // given time.
 func (b *Bench) Exec(ctx context.Context) error {
 	client := b.getClient()
@@ -48,7 +48,7 @@ func (b *Bench) runConcurrentJobs(ctx context.Context, waitChannel chan struct{}
 	wg := &sync.WaitGroup{}
 	remainingConcurrent := b.Concurrency
 	for remainingConcurrent > 0 && *remainingRequests > 0 {
-		for _, url := range b.Urls {
+		for _, url := range b.URLs {
 			req := b.buildRequest(url)
 			req = req.WithContext(ctx)
 			wg.Add(1)
@@ -67,17 +67,17 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 	tr := time.Now()
 	resp, err := client.Do(req)
 	responseTime := time.Since(tr)
-	reqUrl := req.URL.String()
+	reqURL := req.URL.String()
 
 	if err != nil {
 		if err, ok := err.(*url.Error); ok && err.Timeout() {
-			b.printVerbosityMessage(fmt.Sprintf("Timed out request for %s: %v\n", reqUrl, err))
-			b.Report.AddTimedoutResponse(reqUrl)
+			b.printVerbosityMessage(fmt.Sprintf("Timed out request for %s: %v\n", reqURL, err))
+			b.Report.AddTimedoutResponse(reqURL)
 			return
 		}
 
-		b.printVerbosityMessage(fmt.Sprintf("Error for %s: %v\n", reqUrl, err))
-		b.Report.AddFailedResponse(reqUrl)
+		b.printVerbosityMessage(fmt.Sprintf("Error for %s: %v\n", reqURL, err))
+		b.Report.AddFailedResponse(reqURL)
 		return
 	}
 
@@ -90,10 +90,10 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 		contentLength = len(body)
 	}
 
-	b.Report.AddResponseTime(reqUrl, responseTime)
-	b.Report.AddReceivedDataLength(reqUrl, int64(contentLength))
-	b.Report.AddResponseStatusCode(reqUrl, resp.StatusCode, b.isFailed(resp.StatusCode))
-	b.printVerbosityMessage(fmt.Sprintf("Recieved response for sent requests to %s in %v. Status: %s\n", reqUrl, responseTime, http.StatusText(resp.StatusCode)))
+	b.Report.AddResponseTime(reqURL, responseTime)
+	b.Report.AddReceivedDataLength(reqURL, int64(contentLength))
+	b.Report.AddResponseStatusCode(reqURL, resp.StatusCode, b.isFailed(resp.StatusCode))
+	b.printVerbosityMessage(fmt.Sprintf("Received response for sent requests to %s in %v. Status: %s\n", reqURL, responseTime, http.StatusText(resp.StatusCode)))
 }
 
 func (b *Bench) printVerbosityMessage(msg string) {
@@ -141,7 +141,7 @@ func (b *Bench) getDial() func(network, addr string) (net.Conn, error) {
 	return net.Dial
 }
 
-func (b *Bench) buildRequest(u *Url) *http.Request {
+func (b *Bench) buildRequest(u *URL) *http.Request {
 	req, err := newRequest(u)
 
 	if err != nil {
@@ -167,7 +167,7 @@ func (b *Bench) buildRequest(u *Url) *http.Request {
 	return req
 }
 
-func newRequest(u *Url) (*http.Request, error) {
+func newRequest(u *URL) (*http.Request, error) {
 	if u.Method == http.MethodGet || u.Method == http.MethodHead {
 		return http.NewRequest(u.Method, u.Addr, nil)
 	}
