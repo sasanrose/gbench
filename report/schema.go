@@ -40,7 +40,7 @@ type Result struct {
 
 type ConcurrencyResult struct {
 	TotalRequests      int `json:"total-request"`
-	SuccessfulRequests int `json:"sucessful-requests"`
+	SuccessfulRequests int `json:"successful-requests"`
 	FailedRequests     int `json:"failed-requests"`
 	TimedOutRequests   int `json:"timedout-requests"`
 }

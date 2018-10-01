@@ -93,7 +93,7 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 	b.Report.AddResponseTime(reqUrl, responseTime)
 	b.Report.AddReceivedDataLength(reqUrl, int64(contentLength))
 	b.Report.AddResponseStatusCode(reqUrl, resp.StatusCode, b.isFailed(resp.StatusCode))
-	b.printVerbosityMessage(fmt.Sprintf("Recieved response for sent requests to %s in %v. Status: %s\n", reqUrl, responseTime, http.StatusText(resp.StatusCode)))
+	b.printVerbosityMessage(fmt.Sprintf("Received response for sent requests to %s in %v. Status: %s\n", reqUrl, responseTime, http.StatusText(resp.StatusCode)))
 }
 
 func (b *Bench) printVerbosityMessage(msg string) {

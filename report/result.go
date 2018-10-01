@@ -63,7 +63,7 @@ func (r *Result) AddReceivedDataLength(url string, contentLength int64) {
 	r.ReceivedDataLength[url] = contentLength
 }
 
-// Set the total time elapsed since the begining of the bench marck.
+// Set the total time elapsed since the beginning of the bench marck.
 func (r *Result) SetTotalDuration(duration time.Duration) {
 	r.lock.Lock()
 	defer r.lock.Unlock()

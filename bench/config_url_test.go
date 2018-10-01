@@ -58,11 +58,11 @@ func TestFileError(t *testing.T) {
 	f, err := WithFile("/test/file")
 
 	if err == nil || err.Error() != "Test error" {
-		t.Errorf("Expected to recieve error 'Test error' but recieved %v", err)
+		t.Errorf("Expected to receive error 'Test error' but received %v", err)
 	}
 
 	if f != nil {
-		t.Error("Expected to recieve a nil funcion")
+		t.Error("Expected to receive a nil funcion")
 	}
 }
 
@@ -87,7 +87,7 @@ func TestFile(t *testing.T) {
 	f, err := WithFile("/test/file")
 
 	if err != nil {
-		t.Errorf("Expected no error but recieved %v", err)
+		t.Errorf("Expected no error but received %v", err)
 	}
 
 	b := NewBench(f)
