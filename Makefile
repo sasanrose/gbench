@@ -13,3 +13,8 @@ check-cyclo:
 	for file in $$(find -type f -name "*.go" | grep -v "vendor"); do \
 		gocyclo -over 15 "$${file}"; \
 	done
+
+check-golint:
+	for file in $$(find -type f -name "*.go" | grep -v "vendor"); do \
+		golint "$${file}"; \
+	done
