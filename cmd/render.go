@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sasanrose/gbench/render"
+	renderer "github.com/sasanrose/gbench/render/driver"
 	"github.com/sasanrose/gbench/report"
 	"github.com/spf13/cobra"
 )
@@ -53,7 +53,7 @@ func renderCli(file *os.File) {
 		os.Exit(2)
 	}
 
-	r := render.NewStdoutRenderer()
+	r := renderer.NewCli()
 	r.Render(result)
 }
 
