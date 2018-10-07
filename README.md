@@ -86,3 +86,4 @@ Flags:
   -i, --input string     Path to the report file. (default "./report.json")
   -p, --port string      Port to access the html report. (default "8080")
 ```
+**Disclaimer:** Gbench is still beta version. The API may change in future.
