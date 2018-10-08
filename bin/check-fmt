@@ -1,0 +1,10 @@
+#!/bin/sh
+echo $1
+unformatted=$(gofmt -s -l $1)
+[ -z "$unformatted" ] && exit 0
+
+echo "Go files must be formatted with gofmt. Please run \"make fmt\" to fix this:"
+
+gofmt -s -d $1
+
+exit 1
