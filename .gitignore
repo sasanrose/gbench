@@ -1,1 +1,6 @@
 *.swp
+*.orig
+bin/git-hooks
+vendor/
+*.out
+report.json

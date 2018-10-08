@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+if [ ! -z "$(git diff)" ]; then
+    git stash save -q --keep-index
+    restore=true
+fi
+
+echo -e "Running \"go test -race ./...\"\n"
+
+go test -race ./...
+status=$?
+
+if [ $status != 0 ]; then
+    echo -e "\nSome of the tests did not pass!!! Abort committing."
+fi
+
+# Restore stashed changes if required
+if [ "$restore" = true ]; then
+    git stash apply --index -q >/dev/null 2>&1 && git stash drop -q
+fi
+
+exit $status

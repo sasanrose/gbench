@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+source .githooks/base
+
+run "Cyclomatic complexity" "gocyclo -over 15 %file%"
