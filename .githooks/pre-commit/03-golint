@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+source .githooks/base
+
+run "Go lint" "golint -set_exit_status %file%"
