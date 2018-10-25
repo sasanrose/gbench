@@ -31,7 +31,7 @@ func (b *Bench) Exec(ctx context.Context) error {
 	for remainingRequests > 0 {
 		waitChannel := make(chan struct{})
 		doneReqs := b.Requests - remainingRequests
-		b.printVerbosityMessage(fmt.Sprintf("%d of %d (%.1f%%)\n", doneReqs, b.Requests, float64(doneReqs*b.Requests)/100))
+		b.printOutputMessage(fmt.Sprintf("%d of %d (%.1f%%)\n", doneReqs, b.Requests, float64(doneReqs*b.Requests)/100))
 		go b.runConcurrentJobs(ctx, waitChannel, client, &remainingRequests)
 		select {
 		case <-ctx.Done():
@@ -71,12 +71,12 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 
 	if err != nil {
 		if err, ok := err.(*url.Error); ok && err.Timeout() {
-			b.printVerbosityMessage(fmt.Sprintf("Timed out request for %s: %v\n", reqURL, err))
+			b.printOutputMessage(fmt.Sprintf("Timed out request for %s: %v\n", reqURL, err))
 			b.Report.AddTimedoutResponse(reqURL)
 			return
 		}
 
-		b.printVerbosityMessage(fmt.Sprintf("Error for %s: %v\n", reqURL, err))
+		b.printOutputMessage(fmt.Sprintf("Error for %s: %v\n", reqURL, err))
 		b.Report.AddFailedResponse(reqURL)
 		return
 	}
@@ -93,14 +93,14 @@ func (b *Bench) runBench(wg *sync.WaitGroup, client *http.Client, req *http.Requ
 	b.Report.AddResponseTime(reqURL, responseTime)
 	b.Report.AddReceivedDataLength(reqURL, int64(contentLength))
 	b.Report.AddResponseStatusCode(reqURL, resp.StatusCode, b.isFailed(resp.StatusCode))
-	b.printVerbosityMessage(fmt.Sprintf("Received response for sent requests to %s in %v. Status: %s\n", reqURL, responseTime, http.StatusText(resp.StatusCode)))
+	b.printOutputMessage(fmt.Sprintf("Received response for sent requests to %s in %v. Status: %s\n", reqURL, responseTime, http.StatusText(resp.StatusCode)))
 }
 
-func (b *Bench) printVerbosityMessage(msg string) {
-	if b.VerbosityWriter != nil {
-		b.VerbosityWriterLock.Lock()
-		defer b.VerbosityWriterLock.Unlock()
-		fmt.Fprint(b.VerbosityWriter, msg)
+func (b *Bench) printOutputMessage(msg string) {
+	if b.OutputWriter != nil {
+		b.OutputWriterLock.Lock()
+		defer b.OutputWriterLock.Unlock()
+		fmt.Fprint(b.OutputWriter, msg)
 	}
 }
 
@@ -142,33 +142,40 @@ func (b *Bench) getDial() func(network, addr string) (net.Conn, error) {
 }
 
 func (b *Bench) buildRequest(u *URL) *http.Request {
-	req, err := newRequest(u)
+	req, err := b.newRequest(u)
 
 	if err != nil {
 		log.Fatalf("Could not create request for %s: %v", u, err)
 	}
 
-	if b.Auth != nil {
-		req.SetBasicAuth(b.Auth.Username, b.Auth.Password)
+	auth := b.getAuth(u)
+
+	if auth != nil {
+		req.SetBasicAuth(auth.Username, auth.Password)
 	}
 
 	if _, ok := b.Headers["User-Agent"]; !ok {
 		req.Header.Add("User-Agent", "Gbench")
 	}
 
-	for key, value := range b.Headers {
+	headers := b.getHeaders(u)
+
+	for key, value := range headers {
 		req.Header.Add(key, value)
 	}
 
-	if b.RawCookie != "" {
-		req.Header.Add("Set-Cookie", b.RawCookie)
+	rawCookie := b.getRawCookie(u)
+
+	if rawCookie != "" {
+		req.Header.Add("Set-Cookie", rawCookie)
 	}
 
 	return req
 }
 
-func newRequest(u *URL) (*http.Request, error) {
-	if u.Method == http.MethodGet || u.Method == http.MethodHead {
+func (b *Bench) newRequest(u *URL) (*http.Request, error) {
+	if len(u.Data) == 0 ||
+		(u.Method != http.MethodPost && u.Method != http.MethodPatch && u.Method != http.MethodPut) {
 		return http.NewRequest(u.Method, u.Addr, nil)
 	}
 
@@ -187,4 +194,33 @@ func newRequest(u *URL) (*http.Request, error) {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	return req, nil
+}
+
+func (b *Bench) getAuth(u *URL) *Auth {
+	if u.Auth != nil {
+		return u.Auth
+	}
+
+	return b.Auth
+}
+
+func (b *Bench) getHeaders(u *URL) map[string]string {
+	headers := make(map[string]string)
+	for key, value := range b.Headers {
+		headers[key] = value
+	}
+
+	for key, value := range u.Headers {
+		headers[key] = value
+	}
+
+	return headers
+}
+
+func (b *Bench) getRawCookie(u *URL) string {
+	if u.RawCookie != "" {
+		return u.RawCookie
+	}
+
+	return b.RawCookie
 }

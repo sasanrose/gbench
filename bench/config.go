@@ -1,12 +1,12 @@
 package bench
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -45,6 +45,18 @@ func WithSuccessStatusCode(code int) func(*Bench) {
 	}
 }
 
+// WithAuthUserPass adds basic HTTP authentication based on a string with
+// username:password format.
+func WithAuthUserPass(userPass string) (func(*Bench), error) {
+	user, pass, err := parseUserPath(userPass)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return WithAuth(user, pass), nil
+}
+
 // WithAuth adds basic HTTP authentication.
 // Note: This will be used for all the provided urls.
 func WithAuth(username, password string) func(*Bench) {
@@ -53,10 +65,11 @@ func WithAuth(username, password string) func(*Bench) {
 	}
 }
 
-// WithVerbosity adds an endpoint to benchmark.
-func WithVerbosity(w io.Writer) func(*Bench) {
+// WithOutput defines the output writer. All the messages during benchmarking
+// will be written to this writer.
+func WithOutput(w io.Writer) func(*Bench) {
 	return func(b *Bench) {
-		b.VerbosityWriter = w
+		b.OutputWriter = w
 	}
 }
 
@@ -68,23 +81,70 @@ func WithProxy(addr string) func(*Bench) {
 	}
 }
 
-// WithURLString sets a benchmarking endpoint using a string.
-// Supported formats are:
-//
-// GET|http://www.google.com?search=test
-// POST|https://www.google.com|search=test
-// POST|https://www.google.com?query=string|search=test&foo=bar
-// HEAD|https://www.google.com
-func WithURLString(u string) (func(*Bench), error) {
-	parsedURL, err := parseURL(u)
+// WithURLSettings sets a benchmarking endpoint using sepcific URL settings.
+func WithURLSettings(requestedUrl,
+	method string,
+	data []string,
+	headers []string,
+	rawCookie string,
+	userPass string,
+) (func(*Bench), error) {
+	parsedURL, err := url.Parse(requestedUrl)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid URL provided: %v", err)
+	}
+
+	if parsedURL.Scheme == "" {
+		parsedURL.Scheme = "https"
+	}
+
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return nil, errors.New("Only http and https schemes are supported")
+	}
+
+	method = strings.ToUpper(method)
+
+	if len(data) > 0 && method != http.MethodPost && method != http.MethodPut && method != http.MethodPatch {
+		return nil, errors.New("Request data is only allowed with POST, PUT and PATCH request methods")
+	}
+
+	parsedData, err := parseData(data)
 
 	if err != nil {
 		return nil, err
 	}
 
-	f := WithURL(parsedURL)
+	endpoint := &URL{
+		Addr:      parsedURL.String(),
+		Method:    method,
+		Data:      parsedData,
+		RawCookie: rawCookie,
+		Headers:   make(map[string]string),
+	}
 
-	return f, nil
+	if userPass != "" {
+		user, pass, err := parseUserPath(userPass)
+
+		if err != nil {
+			return nil, err
+		}
+
+		endpoint.Auth = &Auth{user, pass}
+	}
+
+	if len(headers) > 0 {
+		for _, header := range headers {
+			key, value, err := parseHeaderString(header)
+
+			if err != nil {
+				return nil, err
+			}
+
+			endpoint.Headers[key] = value
+		}
+	}
+
+	return WithURL(endpoint), nil
 }
 
 // WithConnectionTimeout sets connection timeout.
@@ -120,18 +180,18 @@ func WithHeader(key, value string) func(*Bench) {
 // WithHeaderString sets http headers using a string in key=value format.
 // Note: This will be used for all the provided urls.
 func WithHeaderString(header string) (func(*Bench), error) {
-	keyValue := strings.Split(header, "=")
+	key, value, err := parseHeaderString(header)
 
-	if len(keyValue) != 2 {
-		return nil, fmt.Errorf("%s is not a correct key=value format", header)
+	if err != nil {
+		return nil, err
 	}
 
-	return WithHeader(keyValue[0], keyValue[1]), nil
+	return WithHeader(key, value), nil
 }
 
 // WithFile sets endpoints using a file. The file is expected to have a
 // string as defined in WithURLString in each line.
-func WithFile(path string) (func(*Bench), error) {
+/*func WithFile(path string) (func(*Bench), error) {
 	file, err := fs.Open(path)
 
 	if err != nil {
@@ -162,7 +222,7 @@ func WithFile(path string) (func(*Bench), error) {
 	return func(b *Bench) {
 		b.URLs = append(b.URLs, urls...)
 	}, nil
-}
+}*/
 
 // WithReport sets a result report
 func WithReport(report report.Report) func(*Bench) {
@@ -171,61 +231,57 @@ func WithReport(report report.Report) func(*Bench) {
 	}
 }
 
-func parseURL(u string) (*URL, error) {
-	u = strings.Trim(u, "\" ")
-	parts := strings.Split(u, "|")
-
-	if len(parts) != 2 && len(parts) != 3 {
-		return nil, fmt.Errorf("%s\nWrong URL format. Example: GET|www.google.com?search=test or POST|www.google.com|search=test or HEAD|www.google.com", u)
-	}
-
-	method := strings.ToUpper(parts[0])
-
-	urlStruct, err := url.Parse(parts[1])
-	if err != nil {
-		return nil, fmt.Errorf("Invalid URL provided: %v", err)
-	}
-
-	if err := validateURL(urlStruct, method, len(parts)); err != nil {
-		return nil, fmt.Errorf("Error for '%s': %v", u, err)
-	}
-
+func parseData(formData []string) (map[string]string, error) {
 	data := make(map[string]string)
-	if method == http.MethodPost {
-		if len(parts) != 3 {
-			return nil, fmt.Errorf("%s\nWrong URL format. You need to provide post data. Example: POST|www.google.com|name=sasan&lastname=rose", u)
-		}
-
-		dataParts := strings.Split(parts[2], "&")
+	for _, formValue := range formData {
+		dataParts := strings.Split(formValue, "&")
 		for _, dataPart := range dataParts {
 			keyValue := strings.Split(dataPart, "=")
 			if len(keyValue) != 2 {
-				return nil, fmt.Errorf("Wrong key value format for post data: %s", dataPart)
+				return data, fmt.Errorf("Wrong key value format for request data: %s", dataPart)
 			}
 
 			data[keyValue[0]] = keyValue[1]
 		}
 	}
 
-	return &URL{
-		Addr:   urlStruct.String(),
-		Method: method,
-		Data:   data,
-	}, nil
+	return data, nil
 }
 
-func validateURL(urlStruct *url.URL, method string, lenParts int) error {
-	if method != http.MethodGet && method != http.MethodPost && method != http.MethodHead {
-		return errors.New("Method not allowed")
+func parseUserPath(userPass string) (user, pass string, err error) {
+	m := regexp.MustCompile(`^([^:]+):(.+)$`)
+	if !m.MatchString(userPass) {
+		err = fmt.Errorf("Wrong auth credentials format: %s", userPass)
+		return user, pass, err
 	}
 
-	if urlStruct.Scheme != "http" && urlStruct.Scheme != "https" {
-		return errors.New("Only http and https schemes are supported")
+	matches := m.FindStringSubmatch(userPass)
+
+	user, pass = matches[1], matches[2]
+
+	return user, pass, err
+}
+
+func parseHeaderString(header string) (key, value string, err error) {
+	keyValue := strings.Split(header, ":")
+
+	if len(keyValue) != 2 && len(keyValue) != 1 {
+		err = fmt.Errorf("%s is not a correct 'key: value;' format", header)
+		return key, value, err
 	}
 
-	if (method == http.MethodGet || method == http.MethodHead) && lenParts > 2 {
-		return errors.New("GET and HEAD do not need any data")
+	m := regexp.MustCompile(`^[a-zA-Z0-9-_]+;$`)
+
+	if len(keyValue) == 1 && !m.MatchString(keyValue[0]) {
+		err = fmt.Errorf("%s is not a correct 'key;' format", header)
+		return key, value, err
 	}
 
-	return nil
+	key = strings.Trim(keyValue[0], " ")
+
+	if len(keyValue) > 1 {
+		value = strings.Trim(strings.Trim(keyValue[1], ";"), " ")
+	}
+
+	return key, value, err
 }

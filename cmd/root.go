@@ -10,7 +10,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "gbench",
-	Short: "Gbench, HTTP benchmarking tool",
+	Short: "Gbench, HTTP benchmarking and load generating tool",
 	Long: `Yet another HTTP benchmarking tool inspired by Apache benchmark and Siege.
 For more info please refer to https://github.com/sasanrose/gbench`,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -8,6 +8,64 @@ import (
 	"github.com/sasanrose/gbench/report"
 )
 
+func TestHeaders(t *testing.T) {
+	_, err := WithHeaderString("wrongformat")
+
+	if err == nil {
+		t.Error("Expected to get an error for wrong header format")
+	}
+
+	_, err = WithHeaderString("Accept:text/html")
+
+	if err != nil {
+		t.Error("Unexpected error for correct header format")
+	}
+
+	_, err = WithHeaderString("Accept: text/html")
+
+	if err != nil {
+		t.Error("Unexpected error for correct header format")
+	}
+
+	_, err = WithHeaderString("Accept: text/html;")
+
+	if err != nil {
+		t.Error("Unexpected error for correct header format")
+	}
+
+	_, err = WithHeaderString("X-CustomHeader;")
+
+	if err != nil {
+		t.Error("Unexpected error for correct header format")
+	}
+}
+
+func TestAuthUserPass(t *testing.T) {
+	_, err := WithAuthUserPass("user:pass")
+
+	if err != nil {
+		t.Errorf("Did not expect error for 'user:pass' but got: %v", err)
+	}
+
+	_, err = WithAuthUserPass("user:pass@1234:1234")
+
+	if err != nil {
+		t.Errorf("Did not expect error for 'user:pass@1234:1234' but got: %v", err)
+	}
+
+	_, err = WithAuthUserPass("usernopass")
+
+	if err == nil {
+		t.Error("Expected to get an error for 'usernopass' but got nothing")
+	}
+
+	config, _ := WithAuthUserPass("user:pass")
+
+	if config == nil {
+		t.Error("Expected to get a config func for 'user:pass'")
+	}
+}
+
 func TestConfigurations(t *testing.T) {
 	var buf bytes.Buffer
 
@@ -17,30 +75,17 @@ func TestConfigurations(t *testing.T) {
 
 	r := &report.Result{}
 
-	_, err := WithHeaderString("wrongformat")
-
-	if err == nil {
-		t.Error("Expected to get an error for wrong header format")
-	}
-
-	hConfig, err := WithHeaderString("fooKey=barVal")
-
-	if err != nil {
-		t.Error("Unexpected error for correct header format")
-	}
-
 	configurations := []func(*Bench){
 		WithConcurrency(2),
 		WithRequests(4),
 		WithURL(u),
 		WithAuth("user", "pass"),
-		WithVerbosity(&buf),
+		WithOutput(&buf),
 		WithProxy("testProxy"),
 		WithConnectionTimeout(2 * time.Second),
 		WithResponseTimeout(3 * time.Second),
 		WithRawCookie("testCookie"),
 		WithHeader("testKey", "testVal"),
-		hConfig,
 		WithReport(r),
 		WithSuccessStatusCode(100),
 		WithSuccessStatusCode(101),
@@ -65,8 +110,8 @@ func checkBenchGeneralConfig(b *Bench, t *testing.T) {
 		t.Error("Auth is not set as expected")
 	}
 
-	if b.VerbosityWriter == nil {
-		t.Error("Verbosity writer is not set as expected")
+	if b.OutputWriter == nil {
+		t.Error("Output writer is not set as expected")
 	}
 
 	if b.Proxy != "testProxy" {
@@ -96,10 +141,6 @@ func checkBenchURLs(b *Bench, t *testing.T) {
 	}
 
 	if val, ok := b.Headers["testKey"]; !ok || val != "testVal" {
-		t.Error("Header is not set as expected")
-	}
-
-	if val, ok := b.Headers["fooKey"]; !ok || val != "barVal" {
 		t.Error("Header is not set as expected")
 	}
 
