@@ -1,12 +1,13 @@
-package bench
+package cmd
 
 import (
 	"bytes"
 )
 
 type mockedFSType struct {
-	err  error // An arbitrary error
-	file *mockedFileType
+	err        error // An arbitrary error
+	file       *mockedFileType
+	openedName string
 }
 
 type mockedFileType struct {
@@ -21,10 +22,12 @@ func (m mockedFileType) Close() error {
 	return nil
 }
 
-func (m mockedFSType) Open(name string) (file, error) {
+func (m *mockedFSType) Open(name string) (file, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
+
+	m.openedName = name
 
 	return m.file, nil
 }

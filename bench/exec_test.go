@@ -93,9 +93,9 @@ func TestExec(t *testing.T) {
 	url2 := ts2.URL + "/two"
 	url3 := ts3.URL + "/three"
 
-	withURL1, _ := WithURLString("GET|" + url1)
-	withURL2, _ := WithURLString("POST|" + url2 + "|foo=bar&foo2=bar2")
-	withURL3, _ := WithURLString("HEAD|" + url3)
+	withURL1, _ := WithURLSettings(url1, "GET", []string{}, []string{}, "customTestCookie", "")
+	withURL2, _ := WithURLSettings(url2, "POST", []string{"foo=bar", "foo2=bar2"}, []string{"Custome-Header: val"}, "", "")
+	withURL3, _ := WithURLSettings(url3, "HEAD", []string{}, []string{}, "", "")
 
 	var buf bytes.Buffer
 
@@ -105,7 +105,7 @@ func TestExec(t *testing.T) {
 		withURL1,
 		withURL2,
 		withURL3,
-		WithVerbosity(&buf),
+		WithOutput(&buf),
 		WithRawCookie("testCookie"),
 		WithHeader("Test-Key", "testVal"),
 		WithReport(r),
@@ -115,7 +115,7 @@ func TestExec(t *testing.T) {
 	b.Exec(context.Background())
 
 	if buf.Len() == 0 {
-		t.Errorf("Verbosity writer is empty")
+		t.Errorf("Output writer is empty")
 	}
 
 	expected := &expectedResult{
@@ -167,22 +167,12 @@ func TestExec(t *testing.T) {
 	expectedRequest := &testRequest{
 		path:    "/one",
 		method:  http.MethodGet,
-		cookie:  "testCookie",
+		cookie:  "customTestCookie",
 		headers: expectedHeaders,
 		data:    make(map[string]string),
 	}
 
 	checkRequest(t, hOk, expectedRequest)
-
-	expectedRequest = &testRequest{
-		path:    "/two",
-		method:  http.MethodPost,
-		cookie:  "testCookie",
-		headers: expectedHeaders,
-		data:    map[string]string{"foo": "bar", "foo2": "bar2"},
-	}
-
-	checkRequest(t, hCreated, expectedRequest)
 
 	expectedRequest = &testRequest{
 		path:    "/three",
@@ -193,6 +183,18 @@ func TestExec(t *testing.T) {
 	}
 
 	checkRequest(t, hNotFound, expectedRequest)
+
+	expectedHeaders["Custome-Header"] = "val"
+
+	expectedRequest = &testRequest{
+		path:    "/two",
+		method:  http.MethodPost,
+		cookie:  "testCookie",
+		headers: expectedHeaders,
+		data:    map[string]string{"foo": "bar", "foo2": "bar2"},
+	}
+
+	checkRequest(t, hCreated, expectedRequest)
 }
 
 func checkRequest(t *testing.T, h *testHTTP, expected *testRequest) {
