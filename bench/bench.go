@@ -25,13 +25,13 @@ type Bench struct {
 	Headers map[string]string
 	// Optional definition of status codes (Default is 200 and 201).
 	SuccessStatusCodes []int
-	// Verbosity writer.
-	VerbosityWriter io.Writer
-	// Verbosity writer lock.
-	VerbosityWriterLock *sync.Mutex
+	// Output writer.
+	OutputWriter io.Writer
+	// Output writer writer lock.
+	OutputWriterLock *sync.Mutex
 	// Connection and response timeouts
 	ResponseTimeout, ConnectionTimeout time.Duration
-	// HTTP raw cookie string (i.e. the result of document.cookie).
+	// Optional HTTP raw cookie string (i.e. the result of document.cookie).
 	RawCookie string
 	// Report to use
 	Report report.Report
@@ -43,6 +43,12 @@ type URL struct {
 	Addr, Method string
 	// Optional data to send in the format of key-value.
 	Data map[string]string
+	// Optional URL specific HTTP request headers.
+	Headers map[string]string
+	// Optional URL specific HTTP raw cookie string (i.e. the result of document.cookie).
+	RawCookie string
+	// Optional URL specific basic HTTP authentication.
+	Auth *Auth
 }
 
 // Auth is used for a basic HTTP authentication.
@@ -72,8 +78,8 @@ func NewBench(configurations ...func(*Bench)) *Bench {
 		}
 	}
 
-	if b.VerbosityWriter != nil {
-		b.VerbosityWriterLock = &sync.Mutex{}
+	if b.OutputWriter != nil {
+		b.OutputWriterLock = &sync.Mutex{}
 	}
 
 	if b.Concurrency == 0 {
