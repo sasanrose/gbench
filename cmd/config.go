@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	defaultConcurreny int = 1
-	defaultRequests   int = 1
+	defaultConcurreny = 1
+	defaultRequests   = 1
 
-	defaultStatusCodes []int  = []int{http.StatusOK, http.StatusAccepted, http.StatusCreated}
-	defaultMethod      string = http.MethodGet
+	defaultStatusCodes = []int{http.StatusOK, http.StatusAccepted, http.StatusCreated}
+	defaultMethod      = http.MethodGet
 
 	headers                            []string
 	authUserPass, proxyURL, rawCookie  string
@@ -19,7 +19,8 @@ var (
 	connectionTimeout, responseTimeout time.Duration
 )
 
-type JsonConfig struct {
+// JSONConfig defines the configurations that can be set via JSON file.
+type JSONConfig struct {
 	Host            string        `json:"host"`
 	Concurrency     int           `json:"concurrency"`
 	Requests        int           `json:"requests"`
@@ -33,6 +34,7 @@ type JsonConfig struct {
 	Paths           []*PathConfig `json:"paths"`
 }
 
+// PathConfig defines the paths configurations that can be set via JSON file.
 type PathConfig struct {
 	Path         string   `json:"path"`
 	Method       string   `json:"method"`

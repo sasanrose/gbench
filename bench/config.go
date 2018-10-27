@@ -48,7 +48,7 @@ func WithSuccessStatusCode(code int) func(*Bench) {
 // WithAuthUserPass adds basic HTTP authentication based on a string with
 // username:password format.
 func WithAuthUserPass(userPass string) (func(*Bench), error) {
-	user, pass, err := parseUserPath(userPass)
+	user, pass, err := parseUserPass(userPass)
 
 	if err != nil {
 		return nil, err
@@ -82,14 +82,14 @@ func WithProxy(addr string) func(*Bench) {
 }
 
 // WithURLSettings sets a benchmarking endpoint using sepcific URL settings.
-func WithURLSettings(requestedUrl,
+func WithURLSettings(requestedURL,
 	method string,
 	data []string,
 	headers []string,
 	rawCookie string,
 	userPass string,
 ) (func(*Bench), error) {
-	parsedURL, err := url.Parse(requestedUrl)
+	parsedURL, err := url.Parse(requestedURL)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid URL provided: %v", err)
 	}
@@ -104,11 +104,11 @@ func WithURLSettings(requestedUrl,
 
 	method = strings.ToUpper(method)
 
-	if len(data) > 0 && method != http.MethodPost && method != http.MethodPut && method != http.MethodPatch {
-		return nil, errors.New("Request data is only allowed with POST, PUT and PATCH request methods")
+	if method == "" {
+		method = http.MethodGet
 	}
 
-	parsedData, err := parseData(data)
+	parsedData, err := parseData(data, method)
 
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func WithURLSettings(requestedUrl,
 	}
 
 	if userPass != "" {
-		user, pass, err := parseUserPath(userPass)
+		user, pass, err := parseUserPass(userPass)
 
 		if err != nil {
 			return nil, err
@@ -231,8 +231,13 @@ func WithReport(report report.Report) func(*Bench) {
 	}
 }
 
-func parseData(formData []string) (map[string]string, error) {
+func parseData(formData []string, method string) (map[string]string, error) {
 	data := make(map[string]string)
+
+	if len(formData) > 0 && method != http.MethodPost && method != http.MethodPut && method != http.MethodPatch {
+		return data, errors.New("Request data is only allowed with POST, PUT and PATCH request methods")
+	}
+
 	for _, formValue := range formData {
 		dataParts := strings.Split(formValue, "&")
 		for _, dataPart := range dataParts {
@@ -248,7 +253,7 @@ func parseData(formData []string) (map[string]string, error) {
 	return data, nil
 }
 
-func parseUserPath(userPass string) (user, pass string, err error) {
+func parseUserPass(userPass string) (user, pass string, err error) {
 	m := regexp.MustCompile(`^([^:]+):(.+)$`)
 	if !m.MatchString(userPass) {
 		err = fmt.Errorf("Wrong auth credentials format: %s", userPass)

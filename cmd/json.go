@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -18,32 +18,44 @@ var jsonCmd = &cobra.Command{
 Sample usage:
 
 gbench json config.json`,
-	Run: runJson,
+	Run: runJSON,
 }
 
-func runJson(cmd *cobra.Command, args []string) {
+func runJSON(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
 		cmd.Usage()
-		os.Exit(0)
+		os.Exit(2)
 	}
 
-	file, err := fs.Open(args[0])
+	configurations, err := getJSONConfig(args[0])
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Could not open %s: %v.\n", args[0], err)
-		os.Exit(2)
+		exitWithError(err.Error())
+	}
+
+	runBench(configurations)
+}
+
+func getJSONConfig(filePath string) ([]func(*bench.Bench), error) {
+	file, err := fs.Open(filePath)
+
+	if err != nil {
+		return []func(*bench.Bench){}, fmt.Errorf("Could not open %q: %v", filePath, err)
 	}
 
 	defer file.Close()
 
-	config := &JsonConfig{}
+	config := &JSONConfig{}
 	decoder := json.NewDecoder(file)
 
 	decoder.Decode(config)
 
 	if config.Host == "" {
-		fmt.Fprintln(os.Stderr, "No host is provided")
-		os.Exit(2)
+		return []func(*bench.Bench){}, errors.New("No host is provided")
+	}
+
+	if len(config.Paths) == 0 {
+		return []func(*bench.Bench){}, errors.New("No path is provided")
 	}
 
 	config.Host = strings.TrimRight(config.Host, "/?&")
@@ -60,7 +72,7 @@ func runJson(cmd *cobra.Command, args []string) {
 			path.AuthUserPass)
 
 		if err != nil {
-			log.Fatalf("Error with url: %v", err)
+			return []func(*bench.Bench){}, fmt.Errorf("Error with url: %v", err)
 		}
 
 		configurations = append(configurations, urlConfig)
@@ -86,7 +98,7 @@ func runJson(cmd *cobra.Command, args []string) {
 	proxyURL = config.Proxy
 	rawCookie = config.RawCookie
 
-	runBench(configurations)
+	return configurations, nil
 }
 
 func init() {

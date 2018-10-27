@@ -167,78 +167,6 @@ var failTestCases = []struct {
 	},
 }
 
-/*func TestFileError(t *testing.T) {
-	oldFs := fs
-	mfs := &mockedFSType{}
-	fs = mfs
-
-	defer func() {
-		fs = oldFs
-	}()
-
-	mfs.err = errors.New("Test error")
-
-	f, err := WithFile("/test/file")
-
-	if err == nil || err.Error() != "Test error" {
-		t.Errorf("Expected to receive error 'Test error' but received %v", err)
-	}
-
-	if f != nil {
-		t.Error("Expected to receive a nil funcion")
-	}
-}*/
-
-/*func TestFile(t *testing.T) {
-	oldFs := fs
-	mfs := &mockedFSType{}
-	fs = mfs
-
-	defer func() {
-		fs = oldFs
-	}()
-
-	fileContent := ""
-
-	for _, expectedURL := range expectedURLs {
-		fileContent += expectedURL.testStr + "\n"
-	}
-
-	mockedFile := &mockedFileType{bytes.NewBufferString(fileContent)}
-	mfs.file = mockedFile
-
-	f, err := WithFile("/test/file")
-
-	if err != nil {
-		t.Errorf("Expected no error but received %v", err)
-	}
-
-	b := NewBench(f)
-
-	checkTestResult(b, t)
-}*/
-
-/*func TestFileNoURLs(t *testing.T) {
-	oldFs := fs
-	mfs := &mockedFSType{}
-	fs = mfs
-
-	defer func() {
-		fs = oldFs
-	}()
-
-	fileContent := ""
-
-	mockedFile := &mockedFileType{bytes.NewBufferString(fileContent)}
-	mfs.file = mockedFile
-
-	_, err := WithFile("/test/file")
-
-	if err == nil || !strings.Contains(err.Error(), "Did not find any url in the") {
-		t.Errorf("Expected to get an error for empty urls slice")
-	}
-}*/
-
 func TestURLString(t *testing.T) {
 	configurations := []func(*Bench){}
 
@@ -287,47 +215,51 @@ func checkTestResult(b *Bench, t *testing.T) {
 	}
 
 	for index, url := range expectedURLs {
-		addr := b.URLs[index].Addr
-		method := b.URLs[index].Method
-		data := b.URLs[index].Data
-		headers := b.URLs[index].Headers
-		rawCookie := b.URLs[index].RawCookie
-		auth := b.URLs[index].Auth
-
-		if url.expectedURL.Addr != addr {
-			t.Errorf("Expected address %s but got %s on url index %d", url.expectedURL.Addr, addr, index)
-		}
-
-		if url.expectedURL.Method != method {
-			t.Errorf("Expected method %s but got %s on url index %d", url.expectedURL.Method, method, index)
-		}
-
-		if (url.expectedURL.Data == nil || len(url.expectedURL.Data) == 0) && len(data) > 0 {
-			t.Fatalf("Did not expect any data at url index %d but got %v", index, data)
-		}
-
-		if url.expectedURL.RawCookie != rawCookie {
-			t.Errorf("Unexpected %q as RawCookie but got %q", url.expectedURL.RawCookie, rawCookie)
-		}
-
-		if url.expectedURL.Auth == nil && auth != nil {
-			t.Errorf("Did not expect to get any Auth config nothing for index %d", index)
-		}
-
-		if url.expectedURL.Auth != nil && auth == nil {
-			t.Errorf("Expected to get Auth config but got nothing for index %d", index)
-		}
-
-		if url.expectedURL.Auth != nil && auth != nil &&
-			(url.expectedURL.Auth.Username != auth.Username ||
-				url.expectedURL.Auth.Password != auth.Password) {
-
-			t.Errorf("Expected to get %+v as auth but got %+v for index %d", url.expectedURL.Auth, auth, index)
-		}
-
-		checkMap(index, data, url.expectedURL.Data, t, "data")
-		checkMap(index, headers, url.expectedURL.Headers, t, "headers")
+		checkURLTestResult(url, index, b, t)
 	}
+}
+
+func checkURLTestResult(url urlTest, index int, b *Bench, t *testing.T) {
+	addr := b.URLs[index].Addr
+	method := b.URLs[index].Method
+	data := b.URLs[index].Data
+	headers := b.URLs[index].Headers
+	rawCookie := b.URLs[index].RawCookie
+	auth := b.URLs[index].Auth
+
+	if url.expectedURL.Addr != addr {
+		t.Errorf("Expected address %s but got %s on url index %d", url.expectedURL.Addr, addr, index)
+	}
+
+	if url.expectedURL.Method != method {
+		t.Errorf("Expected method %s but got %s on url index %d", url.expectedURL.Method, method, index)
+	}
+
+	if (url.expectedURL.Data == nil || len(url.expectedURL.Data) == 0) && len(data) > 0 {
+		t.Fatalf("Did not expect any data at url index %d but got %v", index, data)
+	}
+
+	if url.expectedURL.RawCookie != rawCookie {
+		t.Errorf("Unexpected %q as RawCookie but got %q", url.expectedURL.RawCookie, rawCookie)
+	}
+
+	if url.expectedURL.Auth == nil && auth != nil {
+		t.Errorf("Did not expect to get any Auth config nothing for index %d", index)
+	}
+
+	if url.expectedURL.Auth != nil && auth == nil {
+		t.Errorf("Expected to get Auth config but got nothing for index %d", index)
+	}
+
+	if url.expectedURL.Auth != nil && auth != nil &&
+		(url.expectedURL.Auth.Username != auth.Username ||
+			url.expectedURL.Auth.Password != auth.Password) {
+
+		t.Errorf("Expected to get %+v as auth but got %+v for index %d", url.expectedURL.Auth, auth, index)
+	}
+
+	checkMap(index, data, url.expectedURL.Data, t, "data")
+	checkMap(index, headers, url.expectedURL.Headers, t, "headers")
 }
 
 func checkMap(index int, got, expected map[string]string, t *testing.T, name string) {

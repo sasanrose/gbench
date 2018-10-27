@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
 	"os"
 
 	"github.com/sasanrose/gbench/bench"
@@ -22,20 +22,30 @@ gbench exec -X post -d "search=gbench" -r 100 -c 10 www.google.com`,
 func runExec(cmd *cobra.Command, args []string) {
 	if len(args) != 1 {
 		cmd.Usage()
-		os.Exit(0)
+		os.Exit(2)
 	}
 
-	configurations := make([]func(*bench.Bench), 0)
-
-	urlConfig, err := bench.WithURLSettings(args[0], method, data, []string{}, "", "")
+	configurations, err := getExecConfig(args[0])
 
 	if err != nil {
-		log.Fatalf("Error with url: %v", err)
+		exitWithError(err.Error())
+	}
+
+	runBench(configurations)
+}
+
+func getExecConfig(url string) ([]func(*bench.Bench), error) {
+	configurations := make([]func(*bench.Bench), 0)
+
+	urlConfig, err := bench.WithURLSettings(url, method, data, []string{}, "", "")
+
+	if err != nil {
+		return []func(*bench.Bench){}, fmt.Errorf("Error with url: %v", err)
 	}
 
 	configurations = append(configurations, urlConfig)
 
-	runBench(configurations)
+	return configurations, nil
 }
 
 func init() {
