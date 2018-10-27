@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/sasanrose/gbench/bench"
 )
@@ -19,6 +20,8 @@ var testJSON = `{
 	"user": "user:pass",
 	"cookie": "test-raw-cookie",
 	"headers": ["X-Custom-Header: TestValue;"],
+	"connect-timeout": 1000000000,
+	"response-timeout": 5000000000,
 	"paths": [
         {
             "path": "/"
@@ -94,6 +97,10 @@ func TestJSONConfig(t *testing.T) {
 
 	if len(headers) != 1 || headers[0] != "X-Custom-Header: TestValue;" {
 		t.Errorf("Unecxpected Headers: %+v", headers)
+	}
+
+	if connectionTimeout != 1*time.Second || responseTimeout != 5*time.Second {
+		t.Error("Unecxpected timeouts")
 	}
 
 	b := bench.NewBench(configurations...)

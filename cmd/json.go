@@ -97,6 +97,8 @@ func getJSONConfig(filePath string) ([]func(*bench.Bench), error) {
 	authUserPass = config.AuthUserPass
 	proxyURL = config.Proxy
 	rawCookie = config.RawCookie
+	connectionTimeout = config.ConnectTimeout
+	responseTimeout = config.ResponseTimeout
 
 	return configurations, nil
 }
